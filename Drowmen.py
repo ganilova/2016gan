@@ -1,6 +1,6 @@
 from turtle import Turtle
 
-def init_drawman():
+def init_Drawmen():
     global t, x_current, y_current
     t=Turtle()
     t.penup()
@@ -8,7 +8,7 @@ def init_drawman():
     y_current=0
     t.goto(x_current,y_current)
 
-def test_drawman():
+def test_Drawmen():
     pen_down()
     for i in range (5):
         on_vector(10, 20)
@@ -34,8 +34,8 @@ def to_point(x, y):
     y_current=y
     t.goto(x, y)
 
-init_drawman()
+init_Drawmen()
 if __name__ == '__main__':
     import time
-    test_drawman()
+    test_Drawmen()
     time.sleep(5)
