@@ -1,4 +1,4 @@
-from Drowmen import*
+from drawman import*
 from time import*
 def f(x):
     return x*x
