@@ -7,6 +7,7 @@ def init_drawman():
             print('Введите число от 10 до 50 (масштаб координатной сетки)')
             default_scale=int(input())
     t=turtle.Turtle()
+    t.speed(0)
     x_current=0
     y_current=0
     drawman_scale(default_scale)
@@ -17,11 +18,11 @@ def init_drawman():
     y_current=0
     t.goto(x_current,y_current)
 
-def axis(scale): #координатные оси
+def axis(scale): #координатные оси ( масштаб)
     # ось Х
-    t.penup()
+    pen_up()
     t.goto(-scale*10, 0)
-    t.pendown()
+    pen_down()
     t.goto(scale*10-10,0)
     # стрелочка на оси Х
     x,y=t.pos()
@@ -31,9 +32,9 @@ def axis(scale): #координатные оси
     t.goto(x,y)
     t.end_fill()
     #  ось У
-    t.penup()
+    pen_up()
     t.goto(0,-scale*10)
-    t.pendown()
+    pen_down()
     t.goto(0,scale*10-10)
     # стрелочка на оси У
     x,y=t.pos()
@@ -42,25 +43,27 @@ def axis(scale): #координатные оси
     t.goto(x+10,y-10)
     t.goto(x,y)
     t.end_fill()
-    t.penup()
-def grid(scale):    # рисуем сетку
+    pen_up()
+    t._write('12','left',15)
+
+def grid(scale):    # рисуем сетку (масштаб)
     t.color ('lightgray')
     x=-10*scale # вертикальные
     for k in range(20):
-        t.penup()
+        pen_up()
         t.goto(x,-scale*10)
-        t.pendown()
+        pen_down()
         t.goto(x, scale*10)
         x+=scale
     y=10*scale # горизонтальные
     for k in range(20):
-        t.penup()
+        pen_up()
         t.goto(-scale*10, y)
-        t.pendown()
+        pen_down()
         t.goto(scale*10, y)
         y-=scale
     t.color('black')
-    t.penup()
+    pen_up()
 
 def drawman_scale(scale):
     global draw_scale
