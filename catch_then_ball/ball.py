@@ -1,40 +1,50 @@
 from tkinter import*
-def button1_command():
-    print("Button 1 default command")
+from random import choice, randint
+ball_count = 40
+ball_min = 15
+ball_max = 40
+ball_color = ['green', 'lightgrey', 'red', 'yellow', 'blue', 'lightgreen', 'lightblue', '#AA00FF']
+def click_ball(event):
+    """ удаление шарика по клику мышки
+    подсчет удаленных шариков """
+    obj = canvas.find_closest(event.x, event.y)
+    x1, y1, x2, y2 =canvas.coords(obj)
+    if x1<event.x < x2 and y1<event.y< y2:
+        canvas.delete(obj)
+        #FIXME нужно учесть объект в очках
+        create_random_ball()
+def move_all_balls(event):#Передвигает все шарики
+    for obj in canvas.find_all():
+        dx = randint(-5, 5)
+        dy = randint(-5, 5)
+        canvas.move(obj, dx, dy)
 
-def print_hello(event):
-    print(event.num)
-    print(event.x, event.y)
-    me=event.widget
-    if me==button1:
-        print("Hello!")
-    elif me==button2:
-        print("You pressed button 2")
-    else:
-        raise ValueError()
-# x=button['text']='Новый заголовок'
 
-def init_main_window():#Инициализация главного окна
-    global root, button1, button2,label, text, scale
+def create_random_ball(): #Создание шарика в случайном месте игрового поля
+    R = randint(ball_min, ball_max)
+    x = randint(R,int(canvas['width'])-R)
+    y = randint(R,int(canvas['height'])-R)
+    canvas.create_oval(x, y, x+R, y+R, width=0, fill=random_color())
+
+def random_color():
+    """
+    :return: Цвет шарика
+    """
+    return choice(ball_color)
+
+def init_ball(): # Создает шарики для игры
+    for i in range(ball_count):
+        create_random_ball()
+
+def init_main_window():
+    global root, canvas
     root = Tk()
-    button1 = Button(root, text="Button_1",command=button1_command)#Срабатывает на нажатие и отпуск мышки
-    button1.bind("<Button>", print_hello)# Срабатывает на клик мышки
-    button1.pack()
-
-    button2 = Button(root, text="Button_2")
-    button2.bind("<Button>", print_hello)
-    button2.pack()
-    variable = IntVar()
-    #label = Label(root, text='Some text.')
-    label = Label(root, textvariable=variable)#привязка к переменной
-    scale =Scale(root, orient=HORIZONTAL,length=300,
-          from_=0,to=100,tickinterval=10,resolution=1, variable=variable)
-    text = Entry(root, textvariable=variable)
-    label.pack()
-    scale.pack()
-    text.pack()
+    canvas = Canvas(root, background="white", width=400, height=400)
+    canvas.bind("<Button>", click_ball)
+    canvas.bind("<Motion>", move_all_balls)
+    canvas.pack()
 
 if __name__ == '__main__':
     init_main_window()
-
+    init_ball()
     root.mainloop()
