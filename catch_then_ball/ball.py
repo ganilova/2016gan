@@ -11,7 +11,7 @@ def click_ball(event):
     global points, label, root
     obj = canvas.find_closest(event.x, event.y)
     x1, y1, x2, y2 =canvas.coords(obj)
-    if x1<event.x < x2 and y1<event.y< y2:
+    if x1 < event.x < x2 and y1 < event.y < y2:
         canvas.delete(obj)
         points+=1
         label['text']=points
@@ -22,6 +22,7 @@ def move_all_balls(event):#Передвигает все шарики
         dx = randint(-5, 5)
         dy = randint(-5, 5)
         canvas.move(obj, dx, dy)
+        #print(obj)
 
 
 def create_random_ball(): #Создание шарика в случайном месте игрового поля
@@ -29,6 +30,7 @@ def create_random_ball(): #Создание шарика в случайном �
     x = randint(R,int(canvas['width'])-R)
     y = randint(R,int(canvas['height'])-R)
     canvas.create_oval(x, y, x+R, y+R, width=0, fill=random_color())
+
 
 def random_color():
     """
