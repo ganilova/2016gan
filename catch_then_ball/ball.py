@@ -4,41 +4,46 @@ ball_count = 20
 ball_min = 15
 ball_max = 40
 ball_color = ['green', 'lightgrey', 'red', 'yellow', 'blue', 'lightgreen', 'lightblue', '#AA00FF']
-global points
+balls_coord = []#список координат шариков
+balls_num = []#список номеров шариков
 def click_ball(event):
     """ удаление шарика по клику мышки
     подсчет удаленных шариков """
-    global points, label, root
+    global points, label, balls_coord, balls_num
     obj = canvas.find_closest(event.x, event.y)
+    num = obj[0]# вытаскиваем номер объекта из кортежа
     x1, y1, x2, y2 =canvas.coords(obj)
     if x1 < event.x < x2 and y1 < event.y < y2:
         canvas.delete(obj)
+        index = balls_num.index(num)# определяем индекс элемента списка, где храниться номер объекта
+        balls_num.pop(index)# удаляем элемент списка с номером объекта
+        balls_coord.pop(index)# удаляем элемент списка с координатами объекта
         points+=1
-        label['text']=points
+        label['text']=points # изменяем надпись на метке (число удаленных шаров)
         create_random_ball()
 
 def move_all_balls(event):#Передвигает все шарики
     for obj in canvas.find_all():
-        dx = randint(-5, 5)
-        dy = randint(-5, 5)
+        dx = randint(-2, 2)
+        dy = randint(-2, 2)
         canvas.move(obj, dx, dy)
         #print(obj)
 
-
 def create_random_ball(): #Создание шарика в случайном месте игрового поля
+    global balls_coord, balls_num
     R = randint(ball_min, ball_max)
     x = randint(R,int(canvas['width'])-R)
     y = randint(R,int(canvas['height'])-R)
-    canvas.create_oval(x, y, x+R, y+R, width=0, fill=random_color())
+    #рисуем шарик и запоминаем его номер в num_oval
+    num_oval = canvas.create_oval(x, y, x+R, y+R, width=0, fill=random_color())
+    balls_coord.append([x,y])# запоминаем координаты нового шарика
+    balls_num.append(num_oval)# запоминаем номер нового шарика
 
 
 def random_color():
-    """
-    :return: Цвет шарика
-    """
     return choice(ball_color)
 
-def init_ball(): # Создает шарики для игры
+def init_balls(): # Создает начальные шарики для игры
     for i in range(ball_count):
         create_random_ball()
 
@@ -47,8 +52,8 @@ def init_main_window():
     root = Tk()
     label_text = Label(root, text = 'Набранные очки')
     label_text.pack()
-    points = 0
-    label = Label(root, text=points)#привязка к переменной
+    points = 0 # число удаленных шариков
+    label = Label(root, text=points)
     label.pack()
     canvas = Canvas(root, background="white", width=400, height=400)
     canvas.bind("<Button>", click_ball)
@@ -57,5 +62,5 @@ def init_main_window():
 
 if __name__ == '__main__':
     init_main_window()
-    init_ball()
+    init_balls()
     root.mainloop()
