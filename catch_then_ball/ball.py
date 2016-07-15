@@ -16,10 +16,10 @@ def click_ball(event):
     num = obj[0]# вытаскиваем номер объекта из кортежа
     x1, y1, x2, y2 =canvas.coords(obj)
     if x1 < event.x < x2 and y1 < event.y < y2:
-        canvas.delete(obj)
         index = balls_num.index(num)# определяем индекс элемента списка, где храниться номер объекта
         balls_num.pop(index)# удаляем элемент списка с номером объекта
         balls_coord.pop(index)# удаляем элемент списка с координатами объекта
+        canvas.delete(obj)
         points+=1
         label['text']=points # изменяем надпись на метке (число удаленных шаров)
         create_random_ball()
@@ -28,8 +28,9 @@ def move_all_balls(event):#Передвигает все шарики
     global balls_coord
     for obj in balls_coord:
         x1, y1, x2, y2 =canvas.coords(obj[0])
+        # проверяем, не выйдет ли шарик за границы холста
         if x1+obj[1]+obj[3]>=400 or x1+obj[1]<=0:
-            obj[1]=-obj[1]
+            obj[1]=-obj[1] #меняем направление движения
         if y1+obj[2]+obj[3]>=400 or y1+obj[2]<=0:
             obj[2]=-obj[2]
         canvas.move(obj[0],obj[1],obj[2])
