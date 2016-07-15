@@ -1,11 +1,13 @@
 from tkinter import*
 from random import choice, randint
+
 ball_count = 20
 ball_min = 15
 ball_max = 40
 ball_color = ['green', 'lightgrey', 'red', 'yellow', 'blue', 'lightgreen', 'lightblue', '#AA00FF']
 balls_coord = []#список координат шариков
 balls_num = []#список номеров шариков
+
 def click_ball(event):
     """ удаление шарика по клику мышки
     подсчет удаленных шариков """
@@ -23,10 +25,12 @@ def click_ball(event):
         create_random_ball()
 
 def move_all_balls(event):#Передвигает все шарики
-    for obj in canvas.find_all():
-        dx = randint(-2, 2)
-        dy = randint(-2, 2)
-        canvas.move(obj, dx, dy)
+    global balls_coord
+    for obj in balls_coord:
+        if 0<obj[1]+obj[3]<400 and 0<obj[1]+obj[3]<400:
+            canvas.move(obj[0],obj[3],obj[4])
+        #obj[1]+=obj[3]
+        #obj[2]+=obj[4]
         #print(obj)
 
 def create_random_ball(): #Создание шарика в случайном месте игрового поля
@@ -36,7 +40,10 @@ def create_random_ball(): #Создание шарика в случайном �
     y = randint(R,int(canvas['height'])-R)
     #рисуем шарик и запоминаем его номер в num_oval
     num_oval = canvas.create_oval(x, y, x+R, y+R, width=0, fill=random_color())
-    balls_coord.append([x,y])# запоминаем координаты нового шарика
+    dx = randint(-3, 3)
+    dy = randint(-3, 3)
+    # запоминаем идентификатор, кординаты верхнего левого угла, вектор и радиус движения нового шарика
+    balls_coord.append([num_oval, x, y, dx, dy, R])
     balls_num.append(num_oval)# запоминаем номер нового шарика
 
 
