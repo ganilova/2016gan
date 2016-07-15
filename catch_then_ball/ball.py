@@ -27,11 +27,13 @@ def click_ball(event):
 def move_all_balls(event):#Передвигает все шарики
     global balls_coord
     for obj in balls_coord:
-        if 0<obj[1]+obj[3]<400 and 0<obj[1]+obj[3]<400:
-            canvas.move(obj[0],obj[3],obj[4])
-        #obj[1]+=obj[3]
-        #obj[2]+=obj[4]
-        #print(obj)
+        x1, y1, x2, y2 =canvas.coords(obj[0])
+        if x1+obj[1]+obj[3]>=400 or x1+obj[1]<=0:
+            obj[1]=-obj[1]
+        if y1+obj[2]+obj[3]>=400 or y1+obj[2]<=0:
+            obj[2]=-obj[2]
+        canvas.move(obj[0],obj[1],obj[2])
+
 
 def create_random_ball(): #Создание шарика в случайном месте игрового поля
     global balls_coord, balls_num
@@ -40,10 +42,10 @@ def create_random_ball(): #Создание шарика в случайном �
     y = randint(R,int(canvas['height'])-R)
     #рисуем шарик и запоминаем его номер в num_oval
     num_oval = canvas.create_oval(x, y, x+R, y+R, width=0, fill=random_color())
-    dx = randint(-3, 3)
-    dy = randint(-3, 3)
-    # запоминаем идентификатор, кординаты верхнего левого угла, вектор и радиус движения нового шарика
-    balls_coord.append([num_oval, x, y, dx, dy, R])
+    dx = randint(-2, 2)
+    dy = randint(-2, 2)
+    # запоминаем идентификатор, вектор и радиус движения нового шарика
+    balls_coord.append([num_oval, dx, dy, R])
     balls_num.append(num_oval)# запоминаем номер нового шарика
 
 
