@@ -11,7 +11,7 @@ balls_num = []#список номеров шариков
 def click_ball(event):
     """ удаление шарика по клику мышки
     подсчет удаленных шариков """
-    global points, label, balls_coord, balls_num
+    global points, label_bonus, balls_coord, balls_num
     obj = canvas.find_closest(event.x, event.y)
     num = obj[0]# вытаскиваем номер объекта из кортежа
     x1, y1, x2, y2 =canvas.coords(obj)
@@ -21,7 +21,7 @@ def click_ball(event):
         balls_coord.pop(index)# удаляем элемент списка с координатами объекта
         canvas.delete(obj)
         points+=1
-        label['text']=points # изменяем надпись на метке (число удаленных шаров)
+        label_bonus['text']=points # изменяем надпись на метке (число удаленных шаров)
         create_random_ball()
 
 def move_all_balls(event):#Передвигает все шарики
@@ -61,15 +61,18 @@ def init_balls(): # Создает начальные шарики для игр
         create_random_ball()
 
 def init_main_window():
-    global root, canvas, label, points
+    global root, canvas, label_bonus, points
     root = Tk()
-
-    label_text = Label(root, text = 'Набранные очки')
-    label_text.pack()
+    frame_text = Frame(root)
+    label_text = Label(frame_text, text = 'Набранные очки', width=20, font='Calibri 14')
+    label_bonus = Label(frame_text, text='0', font='Calibri 14')
+    label_text.grid(row=0, column=0)
+    label_bonus.grid(row=0, column=1)
+    frame_text.pack()
     points = 0 # число удаленных шариков
-    label = Label(root, text=points)
-    label.pack()
-    canvas = Canvas(root, background="white", width=400, height=400)
+    frame_canvas = Frame(root)
+    frame_canvas.pack()
+    canvas = Canvas(frame_canvas, background="white", width=400, height=400)
     canvas.bind("<Button>", click_ball)
     canvas.bind("<Motion>", move_all_balls)
     canvas.pack()
