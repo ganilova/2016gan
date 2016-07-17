@@ -91,5 +91,4 @@ def init_main_window():
 
 if __name__ == '__main__':
     init_main_window()
-    #init_balls()
     root.mainloop()
