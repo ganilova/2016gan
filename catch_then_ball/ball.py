@@ -63,6 +63,7 @@ def init_balls(): # Создает начальные шарики для игр
 def init_main_window():
     global root, canvas, label, points
     root = Tk()
+
     label_text = Label(root, text = 'Набранные очки')
     label_text.pack()
     points = 0 # число удаленных шариков
