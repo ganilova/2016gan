@@ -1,7 +1,6 @@
 from tkinter import*
 from random import choice, randint
 
-ball_count = 20
 ball_min = 15
 ball_max = 40
 ball_color = '0123456789ABCDEF'
@@ -56,19 +55,32 @@ def random_color():
         color = color + choice(ball_color)
     return color
 
-def init_balls(): # Создает начальные шарики для игры
+def init_balls(event): # Создает начальные шарики для игры
+    let = input_balls.get()
+    if let != '':
+        ball_count = int(let)
+    else:
+        ball_count = 0
     for i in range(ball_count):
         create_random_ball()
+        input_balls.destroy()
+        input_text.destroy()
 
 def init_main_window():
-    global root, canvas, label_bonus, points
+    global root, canvas, label_bonus, points, frame_text, frame_canvas, input_balls, input_text
     root = Tk()
     frame_text = Frame(root)
+    input_balls = Entry(frame_text,width=5, font="12")
+    input_text = Label(frame_text, text = 'Введите число шариков', width=20, font='Calibri 14')
+    input_balls.grid(row=0, column=1)
+    input_text.grid(row=0, column=0)
     label_text = Label(frame_text, text = 'Набранные очки', width=20, font='Calibri 14')
     label_bonus = Label(frame_text, text='0', font='Calibri 14')
-    label_text.grid(row=0, column=0)
-    label_bonus.grid(row=0, column=1)
+    label_text.grid(row=1, column=0)
+    label_bonus.grid(row=1, column=1)
     frame_text.pack()
+    input_balls.focus_set()
+    input_balls.bind("<Return>",init_balls)
     points = 0 # число удаленных шариков
     frame_canvas = Frame(root)
     frame_canvas.pack()
@@ -79,5 +91,5 @@ def init_main_window():
 
 if __name__ == '__main__':
     init_main_window()
-    init_balls()
+    #init_balls()
     root.mainloop()
