@@ -4,7 +4,7 @@ from random import choice, randint
 ball_count = 20
 ball_min = 15
 ball_max = 40
-ball_color = ['green', 'lightgrey', 'red', 'yellow', 'blue', 'lightgreen', 'lightblue', '#AA00FF']
+ball_color = '0123456789ABCDEF'
 balls_coord = []#список координат шариков
 balls_num = []#список номеров шариков
 
@@ -51,7 +51,10 @@ def create_random_ball(): #Создание шарика в случайном �
 
 
 def random_color():
-    return choice(ball_color)
+    color = '#'
+    for c in range(6):
+        color = color + choice(ball_color)
+    return color
 
 def init_balls(): # Создает начальные шарики для игры
     for i in range(ball_count):
