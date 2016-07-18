@@ -1,5 +1,6 @@
 from tkinter import*
 from random import choice, randint
+import time
 
 ball_min = 15
 ball_max = 40
@@ -54,6 +55,7 @@ def random_color():
     return color
 
 def init_balls(event): # Создает начальные шарики для игры
+    global timeEnd
     let = input_balls.get()
     if let != '':
         ball_count = int(let)
@@ -65,6 +67,8 @@ def init_balls(event): # Создает начальные шарики для �
         input_text['text']='Шариков на поле'
         label = Label(frame_text, text=let, font='Calibri 14')
         label.grid(row=0, column=1)
+        timeEnd = int(time.time()+700)
+        tick()
 
 def close_win():
     root.destroy()
@@ -77,6 +81,7 @@ def close_rule():
 def new_win():
     global win, tex, close
     win = Toplevel(root)
+    win.title("Правила игры")
     rule = "За отведенное время надо набрать\n наибольшее количество очков"
     tex = Label(win, text=rule, width=40,height= 10, font="Verdana 12")
     tex.pack()
@@ -91,8 +96,15 @@ def init_menu():
     fm.add_command(label="Правила игры", command=new_win)
     fm.add_command(label="Выход", command=close_win)
 
+def tick():
+    global timeEnd
+    time2 = timeEnd - int(time.time())
+    if time2 != timeEnd:
+        time_Go.config(text=time2)
+    time_Go.after(200, tick)
+
 def init_main_window():
-    global root, canvas, label_bonus, points, frame_text, frame_canvas, input_balls, input_text
+    global root,time_Go, canvas, label_bonus, points, frame_text, frame_canvas, input_balls, input_text
     root = Tk()
     init_menu()
     frame_text = Frame(root)
@@ -107,6 +119,10 @@ def init_main_window():
     frame_text.pack()
     input_balls.focus_set()
     input_balls.bind("<Return>",init_balls)
+    time_text = Label(frame_text, text = 'Оставшееся время (сек)', width=20, font='Calibri 14')
+    time_Go = Label(frame_text, font='Calibri 14')
+    time_text.grid(row=2, column=0)
+    time_Go.grid(row=2, column=1)
     points = 0 # число удаленных шариков
     frame_canvas = Frame(root)
     frame_canvas.pack()
