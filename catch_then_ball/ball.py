@@ -34,7 +34,6 @@ def move_all_balls(event):#Передвигает все шарики
             obj[2]=-obj[2]
         canvas.move(obj[0],obj[1],obj[2])
 
-
 def create_random_ball(): #Создание шарика в случайном месте игрового поля
     global balls_coord, balls_num
     R = randint(ball_min, ball_max)
@@ -47,7 +46,6 @@ def create_random_ball(): #Создание шарика в случайном �
     # запоминаем идентификатор, вектор и радиус движения нового шарика
     balls_coord.append([num_oval, dx, dy, R])
     balls_num.append(num_oval)# запоминаем номер нового шарика
-
 
 def random_color():
     color = '#'
@@ -67,12 +65,15 @@ def init_balls(event): # Создает начальные шарики для �
         input_text['text']='Шариков на поле'
         label = Label(frame_text, text=let, font='Calibri 14')
         label.grid(row=0, column=1)
+
 def close_win():
     root.destroy()
+
 def close_rule():
     tex.destroy()
     close.destroy()
     win.destroy()
+
 def new_win():
     global win, tex, close
     win = Toplevel(root)
@@ -81,15 +82,19 @@ def new_win():
     tex.pack()
     close = Button(win, text="Закрыть",command=close_rule)#Срабатывает на нажатие и отпуск мышки
     close.pack()
-def init_main_window():
-    global root, canvas, label_bonus, points, frame_text, frame_canvas, input_balls, input_text
-    root = Tk()
+
+def init_menu():
     m = Menu(root)
     root.config(menu = m)
     fm = Menu(m)
     m.add_cascade(label="Меню", menu=fm)
     fm.add_command(label="Правила игры", command=new_win)
     fm.add_command(label="Выход", command=close_win)
+
+def init_main_window():
+    global root, canvas, label_bonus, points, frame_text, frame_canvas, input_balls, input_text
+    root = Tk()
+    init_menu()
     frame_text = Frame(root)
     input_balls = Entry(frame_text,width=5, font="12")
     input_text = Label(frame_text, text = 'Введите число шариков', width=20, font='Calibri 14')
