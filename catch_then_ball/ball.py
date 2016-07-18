@@ -67,10 +67,29 @@ def init_balls(event): # Создает начальные шарики для �
         input_text['text']='Шариков на поле'
         label = Label(frame_text, text=let, font='Calibri 14')
         label.grid(row=0, column=1)
-
+def close_win():
+    root.destroy()
+def close_rule():
+    tex.destroy()
+    close.destroy()
+    win.destroy()
+def new_win():
+    global win, tex, close
+    win = Toplevel(root)
+    rule = "За отведенное время надо набрать\n наибольшее количество очков"
+    tex = Label(win, text=rule, width=40,height= 10, font="Verdana 12")
+    tex.pack()
+    close = Button(win, text="Закрыть",command=close_rule)#Срабатывает на нажатие и отпуск мышки
+    close.pack()
 def init_main_window():
     global root, canvas, label_bonus, points, frame_text, frame_canvas, input_balls, input_text
     root = Tk()
+    m = Menu(root)
+    root.config(menu = m)
+    fm = Menu(m)
+    m.add_cascade(label="Меню", menu=fm)
+    fm.add_command(label="Правила игры", command=new_win)
+    fm.add_command(label="Выход", command=close_win)
     frame_text = Frame(root)
     input_balls = Entry(frame_text,width=5, font="12")
     input_text = Label(frame_text, text = 'Введите число шариков', width=20, font='Calibri 14')
