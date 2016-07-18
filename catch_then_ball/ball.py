@@ -64,7 +64,9 @@ def init_balls(event): # Создает начальные шарики для �
     for i in range(ball_count):
         create_random_ball()
         input_balls.destroy()
-        input_text.destroy()
+        input_text['text']='Шариков на поле'
+        label = Label(frame_text, text=let, font='Calibri 14')
+        label.grid(row=0, column=1)
 
 def init_main_window():
     global root, canvas, label_bonus, points, frame_text, frame_canvas, input_balls, input_text
