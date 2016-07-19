@@ -130,7 +130,7 @@ def init_timer():
     time_text.grid(row=2, column=0)
     time_Go.grid(row=2, column=1)
 
-def init_canvas():
+def init_canvas():# вывод поля для шариков
     global canvas
     frame_canvas = Frame(root)
     frame_canvas.pack()
