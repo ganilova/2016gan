@@ -8,7 +8,7 @@ ball_max = 40
 ball_color = '0123456789ABCDEF'
 balls_coord = []#список координат шариков
 balls_num = []#список номеров шариков
-time_limit = 60# время игры
+time_limit = 10# время игры
 def click_ball(event):
     """ удаление шарика по клику мышки
     подсчет удаленных шариков и бонусов"""
@@ -107,7 +107,11 @@ def clock():# вывод времени оставшегося на игру
     if time2 >=0:
         time_Go.config(text=time2)
         time_Go.after(200, clock)
+    if time2==0:
+        selection()
 
+def selection():
+    canvas.destroy()
 def init_header():# формирование текстовой информации на главном окне
     global label_bonus, frame_text, input_balls, input_text
     frame_text = Frame(root,width=400, height=400)
