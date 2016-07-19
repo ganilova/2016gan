@@ -106,15 +106,32 @@ def clock():# вывод времени оставшегося на игру
     time2 = timeEnd - int(time.time())
     if time2 >=0:
         time_Go.config(text=time2)
-        time_Go.after(200, clock)
+        time_Go.after(1000, clock)
     if time2==0:
         selection()
-
+def new_game():
+    win.destroy()
+    frame_text.destroy()
+    frame_canvas.destroy()
+    init_menu()
+    init_header()
+    init_canvas()
+    init_timer()
 def selection():
+    global win, tex, close
     canvas.destroy()
+    win = Toplevel(root)
+    rule = "Вы набрали "+str(bonus)+" баллов\n"
+    rule +="Вы уничтожили "+str(points) +"шариков"
+    tex = Label(win, text=rule, width=30,height= 4, font="Verdana 12")
+    tex.pack()
+    new = Button(win, text="Начать новую игру",command=new_game)#Срабатывает на нажатие и отпуск мышки
+    new.pack()
+    close = Button(win, text="Выход",command=close_win)#Срабатывает на нажатие и отпуск мышки
+    close.pack()
 def init_header():# формирование текстовой информации на главном окне
     global label_bonus, frame_text, input_balls, input_text
-    frame_text = Frame(root,width=400, height=400)
+    frame_text = Frame(root)
     frame_text.pack()
     input_balls = Entry(frame_text,width=5, font="12")
     input_text = Label(frame_text, text = 'Введите число шариков', width=20, font='Calibri 14')
@@ -135,7 +152,7 @@ def init_timer():
     time_Go.grid(row=2, column=1)
 
 def init_canvas():# вывод поля для шариков
-    global canvas
+    global canvas, frame_canvas
     frame_canvas = Frame(root)
     frame_canvas.pack()
     canvas = Canvas(frame_canvas, background="white", width=400, height=400)
