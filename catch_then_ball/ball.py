@@ -110,9 +110,9 @@ def clock():# вывод времени оставшегося на игру
     if time2==0:
         selection()
 def new_game():
-    win.destroy()
     frame_text.destroy()
     frame_canvas.destroy()
+    win.destroy()
     init_menu()
     init_header()
     init_canvas()
@@ -121,8 +121,8 @@ def selection():
     global win, tex, close
     canvas.destroy()
     win = Toplevel(root)
-    rule = "Вы набрали "+str(bonus)+" баллов\n"
-    rule +="Вы уничтожили "+str(points) +"шариков"
+    rule = "Набранных баллов - "+str(bonus)
+    rule +="\nУничтоженных шариков -  "+str(points)
     tex = Label(win, text=rule, width=30,height= 4, font="Verdana 12")
     tex.pack()
     new = Button(win, text="Начать новую игру",command=new_game)#Срабатывает на нажатие и отпуск мышки
