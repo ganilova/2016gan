@@ -105,6 +105,7 @@ def timer_event():
     for ball in balls:
         ball.fly()
     for shell in shells_on_fly:
+        # Проверка за вылет за пределы поля
         if shell._x+shell._Vx>screen_width or shell._y+shell._Vy<0 or  shell._x - shell._Vx<0 or shell._y + shell._Vy>screen_height:
             canvas.delete(shell.avatar)
         else:
