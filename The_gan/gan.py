@@ -4,9 +4,9 @@ from random import choice, randint
 screen_width = 400
 screen_height = 300
 timer_delay = 100
+initial_number = 20
 
 class Ball:
-    initial_number = 20
     minimal_radius = 15
     maximal_radius = 40
     available_colors = ['green', 'blue', 'red']
@@ -23,7 +23,7 @@ class Ball:
         self._x = x
         self._y = y
         fillcolor = choice(Ball.available_colors)
-        self._avatar = canvas.create_oval(x, y, x+2*R, y+2*R,
+        self.avatar = canvas.create_oval(x, y, x+2*R, y+2*R,
                                           width=1, fill=fillcolor,
                                           outline=fillcolor)
         self._Vx = randint(-2, +2)
@@ -47,8 +47,10 @@ class Ball:
             self._y = screen_height - 2*self._R  - 1
             self._Vy = -self._Vy
 
-        canvas.coords(self._avatar, self._x, self._y,
+        canvas.coords(self.avatar, self._x, self._y,
                       self._x + 2*self._R, self._y + 2*self._R)
+
+
 
 
 class Gun:
@@ -66,8 +68,8 @@ class Gun:
         :return возвращает объект снаряда (класса Ball)
         """
         shell = Ball()
-        shell._x = self._x + self._lx
-        shell._y = self._y + self._ly
+        shell._x = self._x - 5 + self._lx
+        shell._y = self._y - 5+ self._ly
         shell._Vx = self._lx/10
         shell._Vy = self._ly/10
         shell._R = 5
@@ -81,7 +83,7 @@ def init_game():
     а также объект - пушку.
     """
     global balls, gun, shells_on_fly
-    balls = [Ball() for i in range(Ball.initial_number)]
+    balls = [Ball() for i in range(initial_number)]
     gun = Gun()
     shells_on_fly = []
 
@@ -103,7 +105,10 @@ def timer_event():
     for ball in balls:
         ball.fly()
     for shell in shells_on_fly:
-        shell.fly()
+        if shell._x+shell._Vx>screen_width or shell._y+shell._Vy<0 or  shell._x - shell._Vx<0 or shell._y + shell._Vy>screen_height:
+            canvas.delete(shell.avatar)
+        else:
+            shell.fly()
     canvas.after(timer_delay, timer_event)
 
 
