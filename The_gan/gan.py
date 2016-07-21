@@ -86,8 +86,7 @@ class Gun:
 def init_game():
     """
     Создаём необходимое для игры количество объектов-шариков,
-    а также объект - пушку.
-    """
+    а также объект - пушку.    """
     global balls, gun, shells_on_fly
     balls = [Ball() for i in range(initial_number)]
     gun = Gun()
