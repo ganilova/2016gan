@@ -109,6 +109,7 @@ def clock():# вывод времени оставшегося на игру
         time_Go.after(1000, clock)
     if time2==0:
         selection()
+
 def new_game():
     frame_text.destroy()
     frame_canvas.destroy()
@@ -117,6 +118,7 @@ def new_game():
     init_header()
     init_canvas()
     init_timer()
+
 def selection():
     global win, tex, close
     canvas.destroy()
@@ -129,6 +131,7 @@ def selection():
     new.pack()
     close = Button(win, text="Выход",command=close_win)#Срабатывает на нажатие и отпуск мышки
     close.pack()
+
 def init_header():# формирование текстовой информации на главном окне
     global label_bonus, frame_text, input_balls, input_text
     frame_text = Frame(root)
