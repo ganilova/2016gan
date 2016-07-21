@@ -2,10 +2,6 @@ from tkinter import*
 
 
 def paint(event):
-    #print(event.x, event.y)
-    if event.widget != canvas:
-        print('Странно, ведь paint() привязали к canvas')
-        return
     canvas.coords(line, 0, 0, event.x, event.y)
 
 
