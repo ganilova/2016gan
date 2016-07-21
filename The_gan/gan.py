@@ -1,6 +1,6 @@
 from tkinter import *
 from random import choice, randint
-
+from math import*
 
 screen_width = 400
 screen_height = 400
@@ -56,56 +56,64 @@ class Ball:
 
         canvas.coords(self.avatar, self._x, self._y,
                       self._x + 2*self._R, self._y + 2*self._R)
-    def delete(self):# удаление экземпляра
+    def delete(self): # удаление экземпляра
         canvas.delete(self.avatar)
 
 class Gun:
     def __init__(self):
         self._x = 0
-        self._y = screen_height-1
-        self._lx = +30
-        self._ly = -30
-        self._avatar = canvas.create_line(self._x, self._y,
-                                          self._x+self._lx,
-                                          self._y+self._ly)
+        self._y = screen_height
+        self.lx = 30
+        self.ly = -30
+        self.avatar = canvas.create_line(self._x, self._y, self._x+self.lx, self._y+self.ly,width=4)
 
     def shoot(self):
-        """
-        :return возвращает объект снаряда (класса Ball)
+        """  :return возвращает объект снаряда (класса Ball)
         """
         shell = Ball()
-        shell._x = self._x - 5 + self._lx
-        shell._y = self._y - 5+ self._ly
-        shell._Vx = self._lx/10
-        shell._Vy = self._ly/10
+        shell._x = self._x - 5 + self.lx
+        shell._y = self._y - 5+ self.ly
+        shell._Vx = self.lx/10
+        shell._Vy = self.ly/10
         shell._R = 5
         shell.fly()
         return shell
 
+    def move(self,dx,dy):
+        dy = self._y-dy
+        r = sqrt(dx**2+dy**2)
+        self.lx =int(42*(dx/r))
+        self.ly = -int(42*(dy/r))
+        canvas.delete(self.avatar)
+        self.avatar = canvas.create_line(self._x, self._y, self._x+self.lx, self._y+self.ly,width=4)
 
 def init_game():
-    """
-    Создаём необходимое для игры количество объектов-шариков,
+    """     Создаём необходимое для игры количество объектов-шариков,
     а также объект - пушку.    """
     global balls, gun, shells_on_fly
     balls = [Ball() for i in range(initial_number)]
     gun = Gun()
     shells_on_fly = []
 
+def angle(event):
+    if 1 < event.x < screen_width and 1 < event.y < screen_height:
+        gun.move(event.x, event.y)
+
 def init_main_window():
     global root, canvas, scores_text, scores_value
     root = Tk()
     root.title("Пушка")
-    root.minsize(450, 550)
-    root.maxsize(450, 550)
+    frame =Frame(root)
+    root.minsize(450, 500)
+    root.maxsize(450, 500)
     scores_value = IntVar()
-    canvas = Canvas(root, width=screen_width, height=screen_height,
-                    bg="white")
-    scores_text = Entry(root, textvariable=scores_value)
+    canvas = Canvas(frame, width=screen_width, height=screen_height,bg="white")
+    scores_text = Entry(frame, textvariable=scores_value, font='Calibri 14')
     canvas.grid(row=1, column=0, columnspan=3)
     scores_text.grid(row=0, column=2)
+    frame.pack()
     canvas.bind('<Button-1>', click_event_handler)
-
+    canvas.bind("<Motion>", angle)
 
 def timer_event():
     # все периодические рассчёты, которые я хочу, делаю здесь
@@ -113,7 +121,7 @@ def timer_event():
         ball.fly()
     for shell in shells_on_fly:
         # Проверка вылета снаряда за пределы поля
-        if shell._x+shell._Vx>screen_width or shell._y+shell._Vy<0 or  shell._x - shell._Vx<0 or shell._y + shell._Vy>screen_height:
+        if shell._x+shell._Vx+10>screen_width or shell._y+shell._Vy<0 or  shell._x - shell._Vx<0 or shell._y + shell._Vy>screen_height:
             shell.delete()
         else:
             shell.fly()
