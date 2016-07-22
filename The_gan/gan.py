@@ -4,7 +4,7 @@ from math import*
 
 screen_width = 400
 screen_height = 400
-timer_delay = 20
+timer_delay = 100
 initial_number = 20
 
 class Ball:
@@ -95,25 +95,39 @@ def init_game():
     gun = Gun()
     shells_on_fly = []
 
-def angle(event):
+def move_gun(event):
     if 1 < event.x < screen_width and 1 < event.y < screen_height:
         gun.move(event.x, event.y)
 
 def init_main_window():
-    global root, canvas, scores_text, scores_value
+    global root, canvas, goals_text, goals_value
     root = Tk()
     root.title("Пушка")
     frame =Frame(root)
     root.minsize(450, 500)
     root.maxsize(450, 500)
-    scores_value = IntVar()
+    goals_value = IntVar()
     canvas = Canvas(frame, width=screen_width, height=screen_height,bg="white")
-    scores_text = Entry(frame, textvariable=scores_value, font='Calibri 14')
+    goals_text = Label(frame, text='Число набранных очков', font='Calibri 14')
+    goals_count = Entry(frame, textvariable=goals_value, font='Calibri 14')
     canvas.grid(row=1, column=0, columnspan=3)
-    scores_text.grid(row=0, column=2)
+    goals_text.grid(row=0, column=0, columnspan=2)
+    goals_count.grid(row=0, column=2)
     frame.pack()
     canvas.bind('<Button-1>', click_event_handler)
-    canvas.bind("<Motion>", angle)
+    canvas.bind("<Motion>", move_gun)
+
+def meeting(event):
+    count = False
+    for ball in balls:
+        # Проверяем, соприкасаются ли снаряд и мяч
+        if ((ball._x+ball._R)-(event._x+event._R))**2+((ball._y+ball._R)-(event._y+event._R))**2<(ball._R+event._R)**2:
+            index = balls.index(ball)
+            balls.pop(index)
+            ball.delete()
+            #FIXMI сделать подсчет очков
+            count =True #если произощло столкновение, фиксируем
+    return count
 
 def timer_event():
     # все периодические рассчёты, которые я хочу, делаю здесь
@@ -122,6 +136,10 @@ def timer_event():
     for shell in shells_on_fly:
         # Проверка вылета снаряда за пределы поля
         if shell._x+shell._Vx+10>screen_width or shell._y+shell._Vy<0 or  shell._x - shell._Vx<0 or shell._y + shell._Vy>screen_height:
+            shell.delete()
+        elif meeting(shell):
+            index = shells_on_fly.index(shell)
+            shells_on_fly.pop(index)
             shell.delete()
         else:
             shell.fly()
