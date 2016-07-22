@@ -8,7 +8,7 @@ ball_max = 40
 ball_color = '0123456789ABCDEF'
 balls_coord = []#список координат шариков
 balls_num = []#список номеров шариков
-time_limit = 10# время игры
+time_limit = 20# время игры
 def click_ball(event):
     """ удаление шарика по клику мышки
     подсчет удаленных шариков и бонусов"""
@@ -123,9 +123,10 @@ def selection():
     global win, tex, close
     canvas.destroy()
     win = Toplevel(root)
-    rule = "Набранных баллов - "+str(bonus)
-    rule +="\nУничтоженных шариков -  "+str(points)
-    tex = Label(win, text=rule, width=30,height= 4, font="Verdana 12")
+    rule = "Время игры истекло! \n"
+    rule += "\nНабранных баллов - "+str(bonus)
+    rule +="\nУничтоженных шариков -  "+str(points)+'\n'
+    tex = Label(win, text=rule, width=30,height= 5, font="Verdana 12")
     tex.pack()
     new = Button(win, text="Начать новую игру",command=new_game)#Срабатывает на нажатие и отпуск мышки
     new.pack()
