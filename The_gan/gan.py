@@ -132,7 +132,6 @@ def meeting(event):
                 goals_value.set(goals_value.get()+3)
             balls.pop(index)
             ball.delete()
-            #FIXMI сделать подсчет очков
             count =True #если произощло столкновение, фиксируем
     return count
 
