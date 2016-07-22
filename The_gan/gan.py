@@ -4,7 +4,7 @@ from math import*
 
 screen_width = 400
 screen_height = 400
-timer_delay = 100
+timer_delay = 20
 initial_number = 20
 
 class Ball:
@@ -118,11 +118,18 @@ def init_main_window():
     canvas.bind("<Motion>", move_gun)
 
 def meeting(event):
+    global goals_value
     count = False
     for ball in balls:
         # Проверяем, соприкасаются ли снаряд и мяч
         if ((ball._x+ball._R)-(event._x+event._R))**2+((ball._y+ball._R)-(event._y+event._R))**2<(ball._R+event._R)**2:
             index = balls.index(ball)
+            if ball._R>25:
+                goals_value.set(goals_value.get()+1)
+            elif ball._R>20:
+                goals_value.set(goals_value.get()+2)
+            else:
+                goals_value.set(goals_value.get()+3)
             balls.pop(index)
             ball.delete()
             #FIXMI сделать подсчет очков
