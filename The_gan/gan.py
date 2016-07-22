@@ -71,6 +71,10 @@ class Gun:
         """  :return возвращает объект снаряда (класса Ball)
         """
         shell = Ball()
+        canvas.delete(shell.avatar)# удаляем шарик с поля
+        # рисуем черным цветом новый шарик
+        shell.avatar = canvas.create_oval(shell._x, shell._y, shell._x+2*shell._R, shell._y+2*shell._R,
+                                          width=1, fill='black',outline='black')
         shell._x = self._x - 5 + self.lx
         shell._y = self._y - 5+ self.ly
         shell._Vx = self.lx/10
