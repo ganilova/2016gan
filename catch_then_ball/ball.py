@@ -91,7 +91,7 @@ def close_win():
 def rules():
     rule = "За отведенное время надо набрать\n наибольшее количество очков\n "
     rule +='Чем мешьше шарик, тем\n больше очков за него дается\n ...'
-    tex = messagebox.showinfo("Правила игры",rule)
+    messagebox.showinfo("Правила игры",rule)
 
 def init_menu():# создание меню
     m = Menu(root)
