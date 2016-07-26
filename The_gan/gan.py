@@ -1,11 +1,13 @@
 from tkinter import *
 from random import choice, randint
 from math import*
+from tkinter import messagebox
 
 screen_width = 400
 screen_height = 400
 timer_delay = 20
 initial_number = 20
+time_limit = 20# время игры
 
 class Ball:
     minimal_radius = 15
@@ -103,24 +105,6 @@ def move_gun(event):
     if 1 < event.x < screen_width and 1 < event.y < screen_height:
         gun.move(event.x, event.y)
 
-def init_main_window():
-    global root, canvas, goals_text, goals_value
-    root = Tk()
-    root.title("Пушка")
-    frame =Frame(root)
-    root.minsize(450, 500)
-    root.maxsize(450, 500)
-    goals_value = IntVar()
-    canvas = Canvas(frame, width=screen_width, height=screen_height,bg="white")
-    goals_text = Label(frame, text='Число набранных очков', font='Calibri 14')
-    goals_count = Entry(frame, textvariable=goals_value, font='Calibri 14')
-    canvas.grid(row=1, column=0, columnspan=3)
-    goals_text.grid(row=0, column=0, columnspan=2)
-    goals_count.grid(row=0, column=2)
-    frame.pack()
-    canvas.bind('<Button-1>', click_event_handler)
-    canvas.bind("<Motion>", move_gun)
-
 def meeting(event):
     global goals_value
     count = False
@@ -139,6 +123,12 @@ def meeting(event):
             count =True #если произощло столкновение, фиксируем
     return count
 
+def click_event_handler(event):
+    global shells_on_fly
+    shell = gun.shoot()
+    shells_on_fly.append(shell)
+    shell_value.set(shell_value.get()+1)
+
 def timer_event():
     # все периодические рассчёты, которые я хочу, делаю здесь
     for ball in balls:
@@ -155,10 +145,52 @@ def timer_event():
             shell.fly()
     canvas.after(timer_delay, timer_event)
 
-def click_event_handler(event):
-    global shells_on_fly
-    shell = gun.shoot()
-    shells_on_fly.append(shell)
+def close_win():
+    root.destroy()
+
+def rules():
+    rule = "На поле движется 20 шариков\n Надо сбить шарики как можно меньшим числом снарядов\n "
+    rule +='Чем мешьше шарик, тем больше очков за него дается\n '
+    rule +='Движение курсора мышки управляет поворотом пушки\n '
+    rule +='Снаряд выпускается по щелчку левой клавиши мышки\n '
+    tex = messagebox.showinfo("Правила игры",rule)
+
+def init_menu():# создание меню
+    m = Menu(root)
+    root.config(menu = m)
+    fm = Menu(m)
+    m.add_cascade(label="Меню", menu=fm)
+    fm.add_command(label="Правила игры", command=rules)
+    fm.add_command(label="Выход", command=close_win)
+
+def init_frame():
+    global canvas, goals_text, goals_value, shell_value
+    frame =Frame(root)
+    goals_value = IntVar()
+    shell_value = IntVar()
+    goals_text = Label(frame, text='Число набранных очков', font='Calibri 14')
+    goals_text.grid(row=0, column=0 )
+    goals_count = Label(frame, width=5,bg='white', textvariable=goals_value, font='Calibri 14')
+    goals_count.grid(row=0, column=1)
+    shell_text = Label(frame, text='Число выпущенных снарядов', font='Calibri 14')
+    shell_text.grid(row=1, column=0)
+    shell_count = Label(frame,width=5, bg='white', textvariable=shell_value, font='Calibri 14')
+    shell_count.grid(row=1, column=1)
+    canvas = Canvas(frame, width=screen_width, height=screen_height,bg="white")
+    canvas.grid(row=2, column=0, columnspan=2)
+    frame.pack()
+
+
+def init_main_window():
+    global root, canvas
+    root = Tk()
+    root.title("Пушка")
+    root.minsize(450, 500)
+    root.maxsize(450, 500)
+    init_frame()
+    canvas.bind('<Button-1>', click_event_handler)
+    canvas.bind("<Motion>", move_gun)
+    init_menu()
 
 if __name__ == "__main__":
     init_main_window()
