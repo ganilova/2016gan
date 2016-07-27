@@ -10,33 +10,57 @@ initial_number = 20
 time_limit = 20# время игры
 
 class Ball:
+    """
+    Абстрактный класс -- предок для шариков-мишеней и для снарядов.
+    Имеет атрибуты x, y, Vx, Vy, R, avatar
+    а также метод fly -- абстрактный (т.е. его нельзя реально вызывать)
+    """
+    def __init__(self, x, y, Vx, Vy, R, avatar):
+
+        self._R = R
+        self._x = x
+        self._y = y
+        self._Vx = Vx
+        self._Vy = Vy
+        self._avatar = avatar
+
+    def fly(self):
+        """
+        Абстрактный метод! Нельзя вызывать.
+        Требуется реализовывать в классах-потомках.
+        """
+        raise RuntimeError()
+
+    def delete(self): # удаление объекта
+        canvas.delete(self._avatar)
+
+class Target(Ball):
+    """
+    Мишень, шары разного цвета и диаметра, отражающиеся от стен
+    """
     minimal_radius = 15
     maximal_radius = 30
-    available_colors = ['green', 'blue', 'red']
+    available_colors = ['green', 'blue', 'red', 'yellow']
 
     def __init__(self):
         """
         Cоздаёт шарик в случайном месте игрового холста canvas,
         при этом шарик не выходит за границы холста!
         """
-        R = randint(Ball.minimal_radius, Ball.maximal_radius)
+        R = randint(Target.minimal_radius, Target.maximal_radius)
         x = randint(0, screen_width-1-2*R)
         y = randint(0, screen_height-1-2*R)
-        self._R = R
-        self._x = x
-        self._y = y
-        fillcolor = choice(Ball.available_colors)
-        self.avatar = canvas.create_oval(x, y, x+2*R, y+2*R,
-                                          width=1, fill=fillcolor,
-                                          outline=fillcolor)
-        dx = 0
-        while dx ==0:
-            dx = randint(-2, 2)
-        dy = 0
-        while dy ==0:
-            dy = randint(-2, 2)
-        self._Vx = dx
-        self._Vy = dy
+        color = choice(Target.available_colors)
+        avatar = canvas.create_oval(x, y, x+2*R, y+2*R,
+                                          width=1, fill=color,
+                                          outline=color)
+        Vx = 0
+        while Vx ==0:
+            Vx = randint(-2, 2)
+        Vy = 0
+        while Vy ==0:
+            Vy = randint(-2, 2)
+        super().__init__(x, y, Vx, Vy, R, avatar)
 
     def fly(self):
         self._x += self._Vx
@@ -55,12 +79,36 @@ class Ball:
         elif self._y + 2*self._R >= screen_height:
             self._y = screen_height - 2*self._R
             self._Vy = -self._Vy
-
-        canvas.coords(self.avatar, self._x, self._y,
+        canvas.coords(self._avatar, self._x, self._y,
                       self._x + 2*self._R, self._y + 2*self._R)
-    def delete(self): # удаление экземпляра
-        canvas.delete(self.avatar)
 
+    def delete(self): # удаление экземпляра
+        canvas.delete(self._avatar)
+
+class Shell(Ball):
+    """
+    Снаряд, вылетающий из пушки.
+    Не отражается от стенок, уничтожается, если вылетел за пределы поля.
+    Двигается по гравитационной траектории.
+    """
+    color = 'black'
+
+    def __init__(self, x, y, Vx, Vy):
+        R = 5
+        avatar = canvas.create_oval(x, y, x+2*R, y+2*R, width=1, fill=Shell.color,
+                                          outline=Shell.color)
+        super().__init__(x, y, Vx, Vy, R, avatar)
+
+    def fly(self):
+        ax = 0
+        ay = 0
+        dt = 2  # квант физического времени
+        self._x += self._Vx*dt + ax*dt**2/2
+        self._y += self._Vy*dt + ay*dt**2/2
+        self._Vx += ax*dt
+        self._Vy += ay*dt
+        canvas.coords(self._avatar, self._x, self._y,
+                      self._x + 2*self._R, self._y + 2*self._R)
 class Gun:
     def __init__(self):
         self._x = 0
@@ -70,22 +118,18 @@ class Gun:
         self.avatar = canvas.create_line(self._x, self._y, self._x+self.lx, self._y+self.ly,width=4)
 
     def shoot(self):
-        """  :return возвращает объект снаряда (класса Ball)
+        """  :return возвращает объект снаряда (класса Shell) по щелчку мышки
         """
-        shell = Ball()
-        canvas.delete(shell.avatar)# удаляем шарик с поля
-        # рисуем черным цветом новый шарик
-        shell.avatar = canvas.create_oval(shell._x, shell._y, shell._x+2*shell._R, shell._y+2*shell._R,
-                                          width=1, fill='black',outline='black')
-        shell._x = self._x - 5 + self.lx
-        shell._y = self._y - 5+ self.ly
-        shell._Vx = self.lx/10
-        shell._Vy = self.ly/10
-        shell._R = 5
+        x = self._x - 5 + self.lx
+        y = self._y - 5+ self.ly
+        Vx = self.lx/10
+        Vy = self.ly/10
+        shell = Shell(x, y, Vx, Vy)
         shell.fly()
         return shell
 
     def move(self,dx,dy):
+        """Движение пушки за мышкой"""
         dy = self._y-dy
         r = sqrt(dx**2+dy**2)
         self.lx =int(42*(dx/r))
@@ -97,7 +141,7 @@ def init_game():
     """     Создаём необходимое для игры количество объектов-шариков,
     а также объект - пушку.    """
     global balls, gun, shells_on_fly
-    balls = [Ball() for i in range(initial_number)]
+    balls = [Target() for i in range(initial_number)]
     gun = Gun()
     shells_on_fly = []
 
