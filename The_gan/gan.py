@@ -7,7 +7,7 @@ screen_width = 400
 screen_height = 400
 timer_delay = 20
 initial_number = 20
-time_limit = 20# время игры
+shell_limit = 25# число выстрелов
 
 class Ball:
     """
@@ -40,7 +40,7 @@ class Target(Ball):
     """
     minimal_radius = 15
     maximal_radius = 30
-    available_colors = ['green', 'blue', 'red', 'yellow']
+    available_colors = ['green', 'blue', 'red']
 
     def __init__(self):
         """
@@ -101,8 +101,8 @@ class Shell(Ball):
 
     def fly(self):
         ax = 0
-        ay = 0
-        dt = 2  # квант физического времени
+        ay = 0.02 #угловая скорость
+        dt = 3  # квант физического времени
         self._x += self._Vx*dt + ax*dt**2/2
         self._y += self._Vy*dt + ay*dt**2/2
         self._Vx += ax*dt
@@ -118,14 +118,8 @@ class Gun:
         self.avatar = canvas.create_line(self._x, self._y, self._x+self.lx, self._y+self.ly,width=4)
 
     def shoot(self):
-        """  :return возвращает объект снаряда (класса Shell) по щелчку мышки
-        """
-        x = self._x - 5 + self.lx
-        y = self._y - 5+ self.ly
-        Vx = self.lx/10
-        Vy = self.ly/10
-        shell = Shell(x, y, Vx, Vy)
-        shell.fly()
+        """  :return возвращает объект снаряда (класса Shell) по щелчку мышки  """
+        shell = Shell(self._x - 5 + self.lx, self._y - 5+ self.ly, self.lx/10, self.ly/10)
         return shell
 
     def move(self,dx,dy):
@@ -169,9 +163,12 @@ def meeting(event):
 
 def click_event_handler(event):
     global shells_on_fly
-    shell = gun.shoot()
-    shells_on_fly.append(shell)
-    shell_value.set(shell_value.get()+1)
+    if shell_value.get()>0:
+        shell = gun.shoot()
+        shells_on_fly.append(shell)
+        shell_value.set(shell_value.get()-1)
+    else:
+        selection()
 
 def timer_event():
     # все периодические рассчёты, которые я хочу, делаю здесь
@@ -207,22 +204,43 @@ def init_menu():# создание меню
     fm.add_command(label="Правила игры", command=rules)
     fm.add_command(label="Выход", command=close_win)
 
+def new_game():
+    win.destroy()
+    frame.destroy()
+    init_frame()
+    init_game()
+    timer_event()
+
+def selection():
+    global win, tex, close
+    canvas.destroy()
+    win = Toplevel(root)
+    tex = Label(win, text='Снаряды закончились', width=20,height= 1, font="Verdana 12")
+    tex.pack()
+    new = Button(win, text="Начать новую игру",command=new_game)#Срабатывает на нажатие и отпуск мышки
+    new.pack()
+    close = Button(win, text="Выход",command=close_win)#Срабатывает на нажатие и отпуск мышки
+    close.pack()
+
 def init_frame():
-    global canvas, goals_text, goals_value, shell_value
+    global canvas, goals_text, goals_value, shell_value, frame
     frame =Frame(root)
     goals_value = IntVar()
     shell_value = IntVar()
+    shell_value.set(shell_limit)
     goals_text = Label(frame, text='Число набранных очков', font='Calibri 14')
     goals_text.grid(row=0, column=0 )
     goals_count = Label(frame, width=5,bg='white', textvariable=goals_value, font='Calibri 14')
     goals_count.grid(row=0, column=1)
-    shell_text = Label(frame, text='Число выпущенных снарядов', font='Calibri 14')
+    shell_text = Label(frame, text='Осталось снарядов', font='Calibri 14')
     shell_text.grid(row=1, column=0)
     shell_count = Label(frame,width=5, bg='white', textvariable=shell_value, font='Calibri 14')
     shell_count.grid(row=1, column=1)
     canvas = Canvas(frame, width=screen_width, height=screen_height,bg="white")
     canvas.grid(row=2, column=0, columnspan=2)
     frame.pack()
+    canvas.bind('<Button-1>', click_event_handler)
+    canvas.bind("<Motion>", move_gun)
 
 
 def init_main_window():
@@ -232,12 +250,11 @@ def init_main_window():
     root.minsize(450, 500)
     root.maxsize(450, 500)
     init_frame()
-    canvas.bind('<Button-1>', click_event_handler)
-    canvas.bind("<Motion>", move_gun)
     init_menu()
+    init_game()
+    timer_event()
 
 if __name__ == "__main__":
     init_main_window()
-    init_game()
-    timer_event()
+
     root.mainloop()
