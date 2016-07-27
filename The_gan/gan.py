@@ -51,10 +51,9 @@ class Target(Ball):
         x = randint(0, screen_width-1-2*R)
         y = randint(0, screen_height-1-2*R)
         color = choice(Target.available_colors)
-        avatar = canvas.create_oval(x, y, x+2*R, y+2*R,
-                                          width=1, fill=color,
-                                          outline=color)
+        avatar = canvas.create_oval(x, y, x+2*R, y+2*R,width=1, fill=color,outline=color)
         Vx = 0
+        # Проверяем, чтобы у шарика не получилось нулевое смещение
         while Vx ==0:
             Vx = randint(-2, 2)
         Vy = 0
@@ -62,17 +61,17 @@ class Target(Ball):
             Vy = randint(-2, 2)
         super().__init__(x, y, Vx, Vy, R, avatar)
 
-    def fly(self):
+    def fly(self): #Движение мишени
         self._x += self._Vx
         self._y += self._Vy
-        # отбивается от горизонтальных стенок
+        # отражается от горизонтальных стенок
         if self._x < 0:
             self._x = 0
             self._Vx = -self._Vx
         elif self._x + 2*self._R >= screen_width:
             self._x = screen_width - 2*self._R
             self._Vx = -self._Vx
-        # отбивается от вертикальных стенок
+        # отражается от вертикальных стенок
         if self._y < 0:
             self._y = 0
             self._Vy = -self._Vy
@@ -82,7 +81,7 @@ class Target(Ball):
         canvas.coords(self._avatar, self._x, self._y,
                       self._x + 2*self._R, self._y + 2*self._R)
 
-    def delete(self): # удаление экземпляра
+    def delete(self): # удаление экземпляра шарика
         canvas.delete(self._avatar)
 
 class Shell(Ball):
@@ -109,7 +108,7 @@ class Shell(Ball):
         self._Vy += ay*dt
         canvas.coords(self._avatar, self._x, self._y,
                       self._x + 2*self._R, self._y + 2*self._R)
-class Gun:
+class Gun:  #Пушка
     def __init__(self):
         self._x = 0
         self._y = screen_height
@@ -137,31 +136,34 @@ def init_game():
     global balls, gun, shells_on_fly
     balls = [Target() for i in range(initial_number)]
     gun = Gun()
-    shells_on_fly = []
+    shells_on_fly = [] # массив снарядов на поле
 
-def move_gun(event):
+def move_gun(event): #движение пушки если указатель мышки в пределах поля
     if 1 < event.x < screen_width and 1 < event.y < screen_height:
         gun.move(event.x, event.y)
 
 def meeting(event):
+    """  Проверяем, соприкасаются ли снаряд и мишень если ДА, добавляем очки
+    в зависимомти от радиуса снаряда и удаляем мишень
+    Если мишень поражена, то функция выдает True, иначе False"""
     global goals_value
     count = False
     for ball in balls:
-        # Проверяем, соприкасаются ли снаряд и мяч
         if ((ball._x+ball._R)-(event._x+event._R))**2+((ball._y+ball._R)-(event._y+event._R))**2<(ball._R+event._R)**2:
-            index = balls.index(ball)
             if ball._R>25:
                 goals_value.set(goals_value.get()+1)
             elif ball._R>20:
                 goals_value.set(goals_value.get()+2)
             else:
                 goals_value.set(goals_value.get()+3)
-            balls.pop(index)
+            balls.remove(ball)
             ball.delete()
             count =True #если произощло столкновение, фиксируем
     return count
 
 def click_event_handler(event):
+    """ По клику левой клавиши мышки и при наличии снарядов shell_value.get()>0
+    выпускается новый снаряд, если снарядов нет, вызывается функция для завершения игры"""
     global shells_on_fly
     if shell_value.get()>0:
         shell = gun.shoot()
@@ -172,24 +174,24 @@ def click_event_handler(event):
 
 def timer_event():
     # все периодические рассчёты, которые я хочу, делаю здесь
-    for ball in balls:
+    for ball in balls: #сдвигаем все снаряды из массива
         ball.fly()
     for shell in shells_on_fly:
         # Проверка вылета снаряда за пределы поля
         if shell._x+shell._Vx+10>screen_width or shell._y+shell._Vy<0 or  shell._x - shell._Vx<0 or shell._y + shell._Vy>screen_height:
             shell.delete()
-        elif meeting(shell):
-            index = shells_on_fly.index(shell)
-            shells_on_fly.pop(index)
-            shell.delete()
+        elif meeting(shell):# Если попали в мишень
+            shells_on_fly.remove(shell)# удаляем снаряд из массива
+            shell.delete() # удаляем объект снаряда
         else:
-            shell.fly()
-    canvas.after(timer_delay, timer_event)
+            shell.fly()# двигаем снаряд
+    canvas.after(timer_delay, timer_event)# задержка
 
-def close_win():
+def close_win():# уничтожаем главное окно со всеми объектами
     root.destroy()
 
 def rules():
+    # вывод правил игры
     rule = "На поле движется 20 шариков\n Надо сбить шарики как можно меньшим числом снарядов\n "
     rule +='Чем мешьше шарик, тем больше очков за него дается\n '
     rule +='Движение курсора мышки управляет поворотом пушки\n '
@@ -204,17 +206,15 @@ def init_menu():# создание меню
     fm.add_command(label="Правила игры", command=rules)
     fm.add_command(label="Выход", command=close_win)
 
-def new_game():
+def new_game():# инициализация новой игры
     win.destroy()
     frame.destroy()
     init_frame()
-    init_game()
-    timer_event()
 
-def selection():
-    global win, tex, close
-    canvas.destroy()
-    win = Toplevel(root)
+def selection():# диалоговое окно, выводиться если закончились снаряды
+    global win, tex , close
+    canvas.destroy()# убираем canvas иначе на каждый щелчок мышки будет выводиться Toplevel
+    win = Toplevel(root)#дочернее окно
     tex = Label(win, text='Снаряды закончились', width=20,height= 1, font="Verdana 12")
     tex.pack()
     new = Button(win, text="Начать новую игру",command=new_game)#Срабатывает на нажатие и отпуск мышки
@@ -241,7 +241,8 @@ def init_frame():
     frame.pack()
     canvas.bind('<Button-1>', click_event_handler)
     canvas.bind("<Motion>", move_gun)
-
+    init_game()
+    timer_event()
 
 def init_main_window():
     global root, canvas
@@ -251,10 +252,7 @@ def init_main_window():
     root.maxsize(450, 500)
     init_frame()
     init_menu()
-    init_game()
-    timer_event()
 
 if __name__ == "__main__":
     init_main_window()
-
     root.mainloop()
