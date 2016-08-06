@@ -1,10 +1,13 @@
 from tkinter import *
 from tkinter import messagebox
+from tkinter.filedialog import *
+import fileinput
 
 frame_sleep_time = 1   # задержка между кадрами в милисекундах
 cell_size = 20 #размер клетки по умолчанию
 field_size = 600     # ширина (высота) игрового поля
 file_name = "map"
+pause = True
 
 class Cell:
     def __init__(self):
@@ -23,39 +26,19 @@ class Cell:
     def delete(self):
         canvas.delete(self.avatar)
 
-def mouse_left(event):
+def mouse_left(event):# изменение поля игры
     global cell
     if 0<event.x < field_size and 0<event.y < field_size:
-        obj = canvas.find_closest(event.x, event.y)#определяет ближайший объект
-        print(obj['fill'])
-        """if int(obj[key])==0:
-            x = event.x//cell_size
-            y = event.y//cell_size
-            cell.set(x,y,1)"""
+        x = event.x//cell_size
+        y = event.y//cell_size
+        if matrix[y][x]==0:
+            cell.set(y,x,1)
+            matrix[y][x] = 1
+        else:
+            cell.set(y,x,0)
+            matrix[y][x] = 0
 
 """
-
-class Field:
-    def __init__(self, field_file, canvas):
-
-        self._canvas = canvas
-        with open(field_file) as file:
-            self.matrix = [None] * cells_vertical_number
-            self.avatars = [None] * cells_vertical_number
-            for yi in range(cells_vertical_number):
-                self.matrix[yi] = [None] * cells_horizontal_number
-                self.avatars[yi] = [None] * cells_horizontal_number
-                line = file.readline().rstrip()
-                line += ' '*(cells_horizontal_number - len(line))
-                for xi in range(cells_horizontal_number):
-                    # любой символ, кроме пробела -- значикт соотв. клетка жива
-                    is_cell_alive = 0 if line[xi] == ' ' else 1
-                    self.matrix[yi][xi] = is_cell_alive
-                    self.avatars[yi][xi] = canvas.create_rectangle(screen_x(xi), screen_y(yi),
-                                                                   screen_x(xi+1), screen_y(yi+1),
-                                                                   fill=cell_color(is_cell_alive),
-                                                                   outline=cell_outline_color(is_cell_alive))
-
     def calculate(self):
         """  """
         # рассчитываем матрицу состояний клеток на следующем шаге
@@ -84,34 +67,63 @@ class Field:
                                                                          fill=cell_color(new_matrix[yi][xi]),
                                                                          outline=cell_outline_color(new_matrix[yi][xi]))
 
-
 def time_event():
     global scores
     # перевычислить состояние поля с клетками
     field.calculate()
     canvas.after(frame_sleep_time, time_event)
 """
+def save_file():#сохранение игрового поля в файл
+    if pause:
+        name_file = asksaveasfilename()+'.txt'
+        f = open(name_file,"w")
+        f.write(str(cell_size)+'\n') #размер клетки
+        for y in range(0,cell_count):
+            for x in range(0,cell_count):
+                f.write(str(matrix[x][y])+'\n')
+        f.close()
+        messagebox.showinfo("Сообщение",'Файл  успешно сохранён.')
+    else:
+        messagebox.showinfo("Ошибка",'Операция сохранения файла недоступна во время работы!')
 
+def load_file():# Чтение игрового поля из файла в массив
+    global scale, matrix
+    if pause:
+        try:
+            name_file = askopenfilename(defaultextension='.txt',filetypes=[('Text files','*.txt')])
+            f = open(name_file,"r")
+            scale.set(int(f.readline().strip())) #размер клетки
+            new_field()
+            for y in range(0,cell_count):
+                for x in range(0,cell_count):
+                    matrix[x][y] = int(f.readline().strip())
+                    if matrix[x][y]==1:
+                        cell.set(x,y,1)
+                    else:
+                        cell.set(x,y,0)
+            f.close()
+        except IOError:
+            messagebox.showinfo("Ошибка",'Не могу открыть файл '+name_file)
+    else:
+        messagebox.showinfo("Ошибка",'Операция открытия файла недоступна во время работы!')
 
 def close_win():# уничтожаем главное окно со всеми объектами
     root.destroy()
 
 def rules():
     # вывод правил игры
-    rule = 'Каждая клетка  может находиться в двух состояниях:'
-    rule +=" быть «живой» или быть «мёртвой» (пустой) \n "
-    rule +='Распределение живых клеток в начале игры называется первым поколением.\n' \
-           ' Каждое следующее поколение рассчитывается на основе предыдущего по таким правилам:\n '
+    rule = '  Каждая клетка  может находиться в двух состояниях:'
+    rule +=" быть «живой» (зеленая) или быть «мёртвой» (пустой). Распределение " \
+           'живых клеток в начале игры называется первым поколением.\n \n' \
+           'Каждое следующее поколение рассчитывается на основе предыдущего по таким правилам:\n '
     rule +='      в пустой (мёртвой) клетке, рядом с которой ровно три живые клетки, зарождается жизнь;\n '
     rule +='      если у живой клетки есть две или три живые соседки, то эта клетка продолжает жить; \n'
-    rule +='      в противном случае (если соседей меньше двух или больше трёх) клетка умирает ' \
-           '(«от одиночества» или «от перенаселённости»)\n '
-    rule +='Игра прекращается, если на поле не останется ни одной «живой» клетки, если при очередном шаге ни одна из '
-    rule +='клеток не меняет своего состояния (складывается стабильная конфигурация) или если конфигурация на очередном '
-    rule +='шаге в точности (без сдвигов и поворотов) '
-    rule +='повторит себя же на одном из более ранних шагов (складывается периодическая конфигурация).\n \n'
-    rule +='Игрок не принимает прямого участия в игре, а лишь расставляет или генерирует начальную конфигурацию «живых»'
-    rule +=' клеток, которые затем взаимодействуют согласно правилам уже без его участия (он является наблюдателем).'
+    rule +='      если соседей меньше двух или больше трёх, клетка умирает ' \
+           '(«от одиночества» или «от перенаселённости»)\n \n '
+    rule +='  Игра прекращается, если на поле не останется ни одной «живой» клетки, или если при очередном шаге ни одна из '
+    rule +='клеток не меняет своего состояния (складывается стабильная конфигурация).\n \n'
+    rule +='  Игрок не принимает прямого участия в игре, а лишь расставляет или загружает из файла начальную конфигурацию «живых»'
+    rule +=' клеток, которые затем взаимодействуют согласно правилам уже без его участия.'
     messagebox.showinfo("Правила игры",rule )
 
 def init_menu():# создание меню
@@ -119,6 +131,8 @@ def init_menu():# создание меню
     root.config(menu = m)
     fm = Menu(m)
     m.add_cascade(label="Меню", menu=fm)
+    fm.add_command(label="Загрузить поле",command=load_file)
+    fm.add_command(label="Сохранить поле",command=save_file)
     fm.add_command(label="Правила игры", command=rules)
     fm.add_command(label="Выход", command=close_win)
 
@@ -127,9 +141,10 @@ def new_field(): #Перечерчивание поле для игры с но�
     init_field()
 
 def init_field(): # рассчитываем и выводим пустое поле игры
-    global cell, canvas, cell_size
+    global cell, canvas, cell_size, cell_count, matrix
     cell_size = scale.get()
     cell_count = field_size // cell_size
+    matrix = [[0] * cell_count for i in range(cell_count)]
     cell = Cell()
     for x in range(cell_count):
             for y in range(cell_count):
@@ -151,18 +166,10 @@ def init_main_window():
     scale = Scale(root, from_=5, to=50, orient=HORIZONTAL,resolution=5, length=95)
     scale.place(x = tab,y = 30)
     scale.set(cell_size)
-    button_new_field = Button(root, text=' Изменить \n поле ',width = len+2, font='Calibri 10', command=new_field)
-    button_new_field.place(x = tab,y = 80)
+    amend_map = Button(root, text=' Изменить \n поле ',width = len+2, font='Calibri 10', command=new_field)
+    amend_map.place(x = tab,y = 80)
     start_or_stop = Button(root, text='Старт', width = len, font='Calibri 12')#, command=start_or_stop, font='arial 14')
     start_or_stop.place(x = tab,y = 240)
-    save_map = Button(root, text='Сохранить', width = len, font='Calibri 12')#, command=save_to_file)
-    save_map.place(x = tab,y = 150)
-    button_load = Button(root, text='Открыть', width = len, font='Calibri 12')#, command=load_of_file)
-    button_load.place(x = tab,y = 180)
-    filename = StringVar()
-    filename.set(file_name)
-    entry = Entry(root, textvariable = filename, width = len+1, font='Calibri 12')
-    entry.place(x = tab,y = 180)
     init_field()
     init_menu()
 
