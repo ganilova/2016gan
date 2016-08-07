@@ -21,12 +21,12 @@ def mouse_left(event):# изменение статуса ячейки по ще
     if 0<event.x < field_size and 0<event.y < field_size:
         x = event.x//cell_size
         y = event.y//cell_size
-        if matrix[x][y]==0:
+        if map[x][y]==0:
             cell.set(x,y,1)
-            matrix[x][y] = 1
+            map[x][y] = 1
         else:
             cell.set(x,y,0)
-            matrix[x][y] = 0
+            map[x][y] = 0
 
 def change_map():
     """
@@ -34,27 +34,51 @@ def change_map():
     Не проверяются крайние клетки поля
     Нет перехода на противоположный край
     """
-    global matrix
-    temp = [[0] * cell_count for i in range(cell_count)]
-    count = 0
+    global map
+    temp = [[0] * cell_count for i in range(cell_count)]# Массив для хранения нового состояния
+    count = 0 #число живых клеток
     for x in range(1,cell_count-1):
             for y in range(1,cell_count-1):
-                count+= matrix[x][y]
-                count_life = 0
+                count+= map[x][y]
+                count_life = 0 # число живых клеток в окружении
                 for i in range(-1,2):
                     for j in range(-1,2):
-                        count_life+=matrix[x+i][y+j]
-                count_life-=matrix[x][y]
-                if matrix[x][y]==0 and count_life == 3 or matrix[x][y]==1 and (count_life == 3 or count_life == 2):
+                        count_life+=map[x+i][y+j]
+                count_life-=map[x][y]
+                if map[x][y]==0 and count_life == 3 or map[x][y]==1 and (count_life == 3 or count_life == 2):
                     temp[x][y] = 1
-    if matrix == temp:
+    """for x in range(1,cell_count-1):
+    # проверка клеток первого и последнего столбца (без угловых клеток)
+        count+= map[x][0]
+        count_life = map[x-1][0]+map[x][0]+map[x+1][0]+map[x-1][1]+map[x+1][1]+map[x-1][cell_count-1]+\
+                     map[x+1][cell_count-1]+map[x][cell_count-1]
+        if map[x][0]==0 and count_life == 3 or map[x][0]==1 and (count_life == 3 or count_life == 2):
+                    temp[x][0] = 1
+        count+= map[x][cell_count-1]
+        count_life = map[x-1][cell_count-2]+map[x][cell_count-2]+map[x+1][cell_count-2]+map[x-1][cell_count-1]+\
+                     map[x+1][cell_count-1]+map[x-1][0]+map[x+1][0]+map[x][0]
+        if map[x][cell_count-1]==0 and count_life == 3 or map[x][cell_count-1]==1 and (count_life == 3 or count_life == 2):
+                    temp[x][cell_count-1] = 1
+    # проверка клеток первой и последней строки (без угловых клеток)
+        count+= map[0][x]
+        count_life = map[0][x-1]+map[1][x]+map[0][x+1]+map[1][x-1]+map[1][x+1]+map[cell_count-1][x-1]+\
+                     map[cell_count-1][x+1]+map[cell_count-1][x]
+        if map[0][x]==0 and count_life == 3 or map[0][x]==1 and (count_life == 3 or count_life == 2):
+                    temp[0][x] = 1
+        count+= map[cell_count-1][x]
+        count_life = map[cell_count-2][x-1]+map[cell_count-2][x]+map[cell_count-2][x+1]+map[cell_count-1][x-1]+\
+                     map[cell_count-1][x+1]+map[0][x-1]+map[0][x+1]+map[0][x]
+        if map[cell_count-1][x]==0 and count_life == 3 or map[cell_count-1][x]==1 and (count_life == 3 or count_life == 2):
+                    temp[cell_count-1][x] = 1"""
+
+    if map == temp:
         count = 0
     else:
-        matrix = temp
+        map = temp
         canvas.delete("all")
         for x in range(0,cell_count):
                 for y in range(0,cell_count):
-                    if matrix[x][y]==1:
+                    if map[x][y]==1:
                         cell.set(x,y,1)
                     else:
                         cell.set(x,y,0)
@@ -83,7 +107,7 @@ def save_file():#сохранение игрового поля в файл
         f.write(str(cell_size)+'\n') #размер клетки
         for x in range(0,cell_count):
             for y in range(0,cell_count):
-                f.write(str(matrix[x][y])+'\n')
+                f.write(str(map[x][y])+'\n')
         f.close()
         messagebox.showinfo("Сообщение",'Файл  успешно сохранён.')
     else:
@@ -91,7 +115,7 @@ def save_file():#сохранение игрового поля в файл
                                      'Нажмите Стоп и повторите операцию.')
 
 def load_file():# Чтение игрового поля из файла в массив
-    global scale, matrix
+    global scale, map
     if pause:
         try:
             name_file = askopenfilename(defaultextension='.txt',filetypes=[('Text files','*.txt')])
@@ -100,8 +124,8 @@ def load_file():# Чтение игрового поля из файла в ма
             new_field()
             for x in range(0,cell_count):
                 for y in range(0,cell_count):
-                    matrix[x][y] = int(f.readline().strip())
-                    if matrix[x][y]==1:
+                    map[x][y] = int(f.readline().strip())
+                    if map[x][y]==1:
                         cell.set(x,y,1)
                     else:
                         cell.set(x,y,0)
@@ -148,15 +172,15 @@ def new_field(): #Перечерчивание поля с новым разме
     init_field()
 
 def init_field(): # рассчитываем и выводим пустое поле игры
-    global cell, canvas, cell_size, cell_count, matrix,avatars
+    global cell, canvas, cell_size, cell_count, map,avatars
     cell_size = scale.get()
     cell_count = field_size // cell_size
-    matrix = [[0] * cell_count for i in range(cell_count)]
+    map = [[0] * cell_count for i in range(cell_count)]
     cell = Cell()
     for x in range(cell_count):
             for y in range(cell_count):
                 cell.set(x,y,0)
-                matrix[x][y] = 0
+                map[x][y] = 0
 
 def init_main_window():
     global root, canvas, scale, go_game
