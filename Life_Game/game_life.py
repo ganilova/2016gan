@@ -1,78 +1,73 @@
-from tkinter import *
 from tkinter import messagebox
 from tkinter.filedialog import *
-import fileinput
 
-frame_sleep_time = 1   # задержка между кадрами в милисекундах
+sleep_time = 50   # задержка между кадрами в милисекундах
 cell_size = 20 #размер клетки по умолчанию
 field_size = 600     # ширина (высота) игрового поля
-file_name = "map"
-pause = True
+pause = True    # истинно, если не запущена игра
 
 class Cell:
     def __init__(self):
         self.size = cell_size
-        self.key = 0
 
     def set(self,x,y,key):# рисование клетки
         colors = {0:"white", 1:"green"}
-        self.x = x
-        self.y = y
-        self.key = key
-        self.avatar = canvas.create_rectangle(y*self.size, x*self.size,
-                                (y+1)*self.size, (x+1)*self.size,
-                                fill = colors[self.key], outline = "lightgray")
-
-    def delete(self):
-        canvas.delete(self.avatar)
+        self.avatar = canvas.create_rectangle(x*self.size, y*self.size,
+                                (x+1)*self.size, (y+1)*self.size,
+                                fill = colors[key], outline = "lightgray")
 
 def mouse_left(event):# изменение статуса ячейки по щелчку ЛКМ
     global cell
     if 0<event.x < field_size and 0<event.y < field_size:
         x = event.x//cell_size
         y = event.y//cell_size
-        if matrix[y][x]==0:
-            cell.set(y,x,1)
-            matrix[y][x] = 1
+        if matrix[x][y]==0:
+            cell.set(x,y,1)
+            matrix[x][y] = 1
         else:
-            cell.set(y,x,0)
-            matrix[y][x] = 0
+            cell.set(x,y,0)
+            matrix[x][y] = 0
 
-"""
-    def calculate(self):
-        """  """
-        # рассчитываем матрицу состояний клеток на следующем шаге
-        new_matrix = [[0]*cells_horizontal_number for i in range(cells_vertical_number)]
-        for yi in range(1, cells_vertical_number-1):
-            for xi in range(1, cells_horizontal_number-1):
-                # подсчитаем количество живых соседей
-                number_of_neighbours = 0
-                for i in range(-1, 2):
-                    for j in range(-1, 2):
-                        number_of_neighbours += self.matrix[yi+i][xi+j]
-                number_of_neighbours -= self.matrix[yi][xi]
-                cell_is_alive = self.matrix[yi][xi]
-                if (cell_is_alive and number_of_neighbours == 2) or number_of_neighbours == 3:
-                    new_matrix[yi][xi] = 1
-                else:
-                    new_matrix[yi][xi] = 0
-        # копируем рассчитанную матрицу в self.matrix
-        for yi in range(1, cells_vertical_number-1):
-            for xi in range(1, cells_horizontal_number-1):
-                if self.matrix[yi][xi] != new_matrix[yi][xi]:
-                    self.matrix[yi][xi] = new_matrix[yi][xi]
-                    self._canvas.delete(self.avatars[yi][xi])
-                    self.avatars[yi][xi] = self._canvas.create_rectangle(screen_x(xi), screen_y(yi),
-                                                                         screen_x(xi+1), screen_y(yi+1),
-                                                                         fill=cell_color(new_matrix[yi][xi]),
-                                                                         outline=cell_outline_color(new_matrix[yi][xi]))
+def change_map():
+    """
+    Изменение состояния поля по правилам игры
+    Не проверяются крайние клетки поля
+    Нет перехода на противоположный край
+    """
+    global matrix
+    temp = [[0] * cell_count for i in range(cell_count)]
+    count = 0
+    for x in range(1,cell_count-1):
+            for y in range(1,cell_count-1):
+                count+= matrix[x][y]
+                count_life = 0
+                for i in range(-1,2):
+                    for j in range(-1,2):
+                        count_life+=matrix[x+i][y+j]
+                count_life-=matrix[x][y]
+                if matrix[x][y]==0 and count_life == 3 or matrix[x][y]==1 and (count_life == 3 or count_life == 2):
+                    temp[x][y] = 1
+    if matrix == temp:
+        count = 0
+    else:
+        matrix = temp
+        canvas.delete("all")
+        for x in range(0,cell_count):
+                for y in range(0,cell_count):
+                    if matrix[x][y]==1:
+                        cell.set(x,y,1)
+                    else:
+                        cell.set(x,y,0)
+    return count
 
 def time_event():
-    global scores
     # перевычислить состояние поля с клетками
-    field.calculate()
-    canvas.after(frame_sleep_time, time_event)
-"""
+    if not pause:
+        if change_map()==0:
+            messagebox.showinfo("Сообщение",'Игра закончена')
+            game()
+    canvas.after(sleep_time, time_event)
+
 def game():
     global pause
     if pause:
@@ -82,18 +77,18 @@ def game():
     pause = not pause
 
 def save_file():#сохранение игрового поля в файл
-
     if pause:
         name_file = asksaveasfilename()+'.txt'
         f = open(name_file,"w")
         f.write(str(cell_size)+'\n') #размер клетки
-        for y in range(0,cell_count):
-            for x in range(0,cell_count):
+        for x in range(0,cell_count):
+            for y in range(0,cell_count):
                 f.write(str(matrix[x][y])+'\n')
         f.close()
         messagebox.showinfo("Сообщение",'Файл  успешно сохранён.')
     else:
-        messagebox.showinfo("Ошибка",'Операция сохранения файла недоступна во время работы!')
+        messagebox.showinfo("Ошибка",'Операция сохранения файла недоступна во время работы!\n '
+                                     'Нажмите Стоп и повторите операцию.')
 
 def load_file():# Чтение игрового поля из файла в массив
     global scale, matrix
@@ -103,8 +98,8 @@ def load_file():# Чтение игрового поля из файла в ма
             f = open(name_file,"r")
             scale.set(int(f.readline().strip())) #считываем размер клетки
             new_field()
-            for y in range(0,cell_count):
-                for x in range(0,cell_count):
+            for x in range(0,cell_count):
+                for y in range(0,cell_count):
                     matrix[x][y] = int(f.readline().strip())
                     if matrix[x][y]==1:
                         cell.set(x,y,1)
@@ -114,7 +109,8 @@ def load_file():# Чтение игрового поля из файла в ма
         except IOError:
             messagebox.showinfo("Ошибка",'Не могу открыть файл '+name_file)
     else:
-        messagebox.showinfo("Ошибка",'Операция открытия файла недоступна во время работы!')
+        messagebox.showinfo("Ошибка",'Операция открытия файла недоступна во время работы!\n '
+                                     'Нажмите Стоп и повторите операцию.')
 
 def close_win():# уничтожаем главное окно со всеми объектами
     root.destroy()
@@ -131,8 +127,10 @@ def rules():
            '(«от одиночества» или «от перенаселённости»)\n \n '
     rule +='  Игра прекращается, если на поле не останется ни одной «живой» клетки, или если при очередном шаге ни одна из '
     rule +='клеток не меняет своего состояния (складывается стабильная конфигурация).\n \n'
-    rule +='  Игрок не принимает прямого участия в игре, а лишь расставляет или загружает из файла начальную конфигурацию «живых»'
-    rule +=' клеток, которые затем взаимодействуют согласно правилам уже без его участия.'
+    rule +='  Игрок не принимает прямого участия в игре, а лишь расставляет на поле' \
+           'живые клетки левой клавишей "мышки" или загружает начальную конфигурацию из файла'
+    rule +=' клеток, которые затем взаимодействуют согласно правилам уже без его участия.\n \n'
+    rule +='Созданную конфигурацию первого поколения можно сохранить в файле.'
     messagebox.showinfo("Правила игры",rule )
 
 def init_menu():# создание меню
@@ -145,7 +143,7 @@ def init_menu():# создание меню
     fm.add_command(label="Правила игры", command=rules)
     fm.add_command(label="Выход", command=close_win)
 
-def new_field(): #Перечерчивание поле для игры с новым размером ячейки
+def new_field(): #Перечерчивание поля с новым размером ячейки
     canvas.delete("all")
     init_field()
 
@@ -159,7 +157,6 @@ def init_field(): # рассчитываем и выводим пустое по
             for y in range(cell_count):
                 cell.set(x,y,0)
                 matrix[x][y] = 0
-
 
 def init_main_window():
     global root, canvas, scale, go_game
@@ -189,7 +186,5 @@ if __name__ == "__main__":
     Основная программа
     """
     init_main_window()
+    time_event()
     root.mainloop()
-    """     мусор
-    time_event()  # начинаю циклически запускать таймер
-    """
