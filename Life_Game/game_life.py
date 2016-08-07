@@ -26,7 +26,7 @@ class Cell:
     def delete(self):
         canvas.delete(self.avatar)
 
-def mouse_left(event):# изменение поля игры
+def mouse_left(event):# изменение статуса ячейки по щелчку ЛКМ
     global cell
     if 0<event.x < field_size and 0<event.y < field_size:
         x = event.x//cell_size
@@ -73,7 +73,16 @@ def time_event():
     field.calculate()
     canvas.after(frame_sleep_time, time_event)
 """
+def game():
+    global pause
+    if pause:
+        go_game["text"]='Стоп'
+    else:
+        go_game["text"]='Старт'
+    pause = not pause
+
 def save_file():#сохранение игрового поля в файл
+
     if pause:
         name_file = asksaveasfilename()+'.txt'
         f = open(name_file,"w")
@@ -92,7 +101,7 @@ def load_file():# Чтение игрового поля из файла в ма
         try:
             name_file = askopenfilename(defaultextension='.txt',filetypes=[('Text files','*.txt')])
             f = open(name_file,"r")
-            scale.set(int(f.readline().strip())) #размер клетки
+            scale.set(int(f.readline().strip())) #считываем размер клетки
             new_field()
             for y in range(0,cell_count):
                 for x in range(0,cell_count):
@@ -141,7 +150,7 @@ def new_field(): #Перечерчивание поле для игры с но�
     init_field()
 
 def init_field(): # рассчитываем и выводим пустое поле игры
-    global cell, canvas, cell_size, cell_count, matrix
+    global cell, canvas, cell_size, cell_count, matrix,avatars
     cell_size = scale.get()
     cell_count = field_size // cell_size
     matrix = [[0] * cell_count for i in range(cell_count)]
@@ -149,9 +158,11 @@ def init_field(): # рассчитываем и выводим пустое по
     for x in range(cell_count):
             for y in range(cell_count):
                 cell.set(x,y,0)
+                matrix[x][y] = 0
+
 
 def init_main_window():
-    global root, canvas, scale
+    global root, canvas, scale, go_game
     root = Tk()
     root.title('Игра "Жизнь"')
     root.minsize(field_size + 140, field_size)
@@ -168,12 +179,10 @@ def init_main_window():
     scale.set(cell_size)
     amend_map = Button(root, text=' Изменить \n поле ',width = len+2, font='Calibri 10', command=new_field)
     amend_map.place(x = tab,y = 80)
-    start_or_stop = Button(root, text='Старт', width = len, font='Calibri 12')#, command=start_or_stop, font='arial 14')
-    start_or_stop.place(x = tab,y = 240)
+    go_game = Button(root, text='Старт', width = len, font='Calibri 12', command=game)
+    go_game.place(x = tab,y = 240)
     init_field()
     init_menu()
-
-
 
 if __name__ == "__main__":
     """
@@ -182,7 +191,5 @@ if __name__ == "__main__":
     init_main_window()
     root.mainloop()
     """     мусор
-    canvas.bind('<Motion>', mouse_move)
-    field = Field('map2.txt', canvas)
     time_event()  # начинаю циклически запускать таймер
     """
