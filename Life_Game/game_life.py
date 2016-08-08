@@ -23,45 +23,40 @@ def mouse_left(event):# изменение статуса ячейки по ще
     if 0<event.x < field_size and 0<event.y < field_size:# ограничиваем действие мышки полем игры
         x = event.x//cell_size
         y = event.y//cell_size
-        key = abs(map[x+1][y+1]-1)
-        map[x+1][y+1] = key
-        cell.set(x,y,key)
+        key = abs(map[x+1][y+1]-1)# изменяем статус клетки на противоположный
+        map[x+1][y+1] = key # запоминаем новый статус
+        cell.set(x,y,key) #  перекрашиваем клетку в соответствии со статусом
 
-def change_map():
-    """
-    Изменение состояния поля по правилам игры
-    проверяются крайние клетки поля
-    выполнен переход на противоположный край
-    """
+def change_map():#  Изменение состояния поля по правилам игры
     global map
-    for x in range(0,cell_count+2):
-                map[0][x]=map[cell_count][x]
-                map[cell_count+1][x]=map[1][x]
-                map[x][0]=map[x][cell_count]
-                map[x][cell_count+1]=map[x][1]
+    for x in range(0,cell_count+2):# копируются крайние столбцы (строки)на противоположную сторону
+                map[0][x]=map[cell_count][x] # последнюю строку поля  в нулевую строку матрицы
+                map[cell_count+1][x]=map[1][x] # первую строку поля в последнюю строку матрицы
+                map[x][0]=map[x][cell_count]    # последний столбец поля в нулевой столбец матрицы
+                map[x][cell_count+1]=map[x][1]  # первый столбец поля в последний столбец матрицы
     temp = [[0] * (cell_count+2) for i in range(cell_count+2)]# Массив для хранения нового состояния
     count = 0 #число живых клеток
-    for x in range(1,cell_count+1):
+    for x in range(1,cell_count+1):# Пересчитываем массив и запоминаем результат во вспомогательном массиве
             for y in range(1,cell_count+1):
-                count+= map[x][y]
+                count+= map[x][y]   # считаем число живых клеток на всем поле
                 count_life = 0 # число живых клеток в окружении
-                for i in range(-1,2):
+                for i in range(-1,2):# Подсчитываем число живых клеток в окружении
                     for j in range(-1,2):
                         count_life+=map[x+i][y+j]
-                count_life-=map[x][y]
+                count_life-=map[x][y]   # центральную клетку не считаем
                 if map[x][y]==0 and count_life == 3 or map[x][y]==1 and (count_life == 3 or count_life == 2):
-                    temp[x][y] = 1
-    for x in range(0,cell_count+2):# копируются крайние столбцы (строки)на противоположную сторону
+                    temp[x][y] = 1 # отмечаем живые клетки
+    for x in range(0,cell_count+2):# копируются крайние столбцы (строки)на противоположную сторону(стр 37)
             temp[0][x]=temp[cell_count][x]
             temp[cell_count+1][x]=temp[1][x]
             temp[x][0]=temp[x][cell_count]
             temp[x][cell_count+1]=temp[x][1]
-    if map == temp:
+    if map == temp:# изменений не произошло
         count = 0
     else:
         map = temp
-        canvas.delete("all")
-        for x in range(1,cell_count+1):
+        canvas.delete("all")    # очищаем поле
+        for x in range(1,cell_count+1):# выводим новое состояние поля
                 for y in range(1,cell_count+1):
                     if map[x][y]==1:
                         cell.set(x-1,y-1,1)
@@ -69,15 +64,14 @@ def change_map():
                         cell.set(x-1,y-1,0)
     return count
 
-def time_event():
-    # перевычислить состояние поля с клетками
+def time_event():# работает постоянно,
     if not pause:
         if change_map()==0:
             messagebox.showinfo("Сообщение",'Игра закончена')
-            game()
+            game()# останавливаем игру
     canvas.after(sleep_time, time_event)
 
-def game():
+def game():# процедура для кнопки СТАРТ/СТОП
     global pause
     if pause:
         go_game["text"]='Стоп'
@@ -89,12 +83,12 @@ def save_file():#сохранение игрового поля в файл
     if pause:
         name_file = asksaveasfilename()+'.txt'
         f = open(name_file,"w")
-        f.write(str(cell_size)+'\n') #размер клетки
-        for x in range(1,cell_count+1):
+        f.write(str(cell_size)+'\n') # сохраняем размер клетки
+        for x in range(1,cell_count+1):# сохраняем содержимое матрицы состояния поля
             for y in range(1,cell_count+1):
                 f.write(str(map[x][y])+'\n')
         f.close()
-        messagebox.showinfo("Сообщение",'Файл  успешно сохранён.')
+        messagebox.showinfo("Сообщение",'Файл  сохранён.')
     else:
         messagebox.showinfo("Ошибка",'Операция сохранения файла недоступна во время работы!\n '
                                      'Нажмите Стоп и повторите операцию.')
@@ -106,14 +100,12 @@ def load_file():# Чтение игрового поля из файла в ма
             name_file = askopenfilename(defaultextension='.txt',filetypes=[('Text files','*.txt')])
             f = open(name_file,"r")
             scale.set(int(f.readline().strip())) #считываем размер клетки
-            new_field()
-            for x in range(1,cell_count+1):
+            new_field()#  рисуем поле в соответствии со считанным размером
+            for x in range(1,cell_count+1):# считываем информацию о распределении живых клеток в матрицу
                 for y in range(1,cell_count+1):
                     map[x][y] = int(f.readline().strip())
                     if map[x][y]==1:
-                        cell.set(x-1,y-1,1)
-                    else:
-                        cell.set(x-1,y-1,0)
+                        cell.set(x-1,y-1,1)# закрашиваем живые клетки
             f.close()
             for x in range(0,cell_count+2):
                 map[0][x]=map[cell_count][x]
@@ -165,9 +157,13 @@ def init_field(): # рассчитываем и выводим пустое по
     global cell, canvas, cell_size, cell_count, map,avatars
     cell_size = scale.get()
     cell_count = field_size // cell_size
+    """map - матрица для хранения статуса ячеек (живые/неживые). Непосредственно информация
+    о статусе ячеек хранится в матрице с 1 по cell_count, нулевая и cell_count+1 столбцы/строки
+    хранят информацию о противоположном столбце/строке, что позволяет выполнить игру на "бесконечном" поле.
+    Живые клетки, возникающие за границами видимого поля появляются на противоположной стороне поля"""
     map = [[0] * (cell_count+2) for i in range(cell_count+2)]
     cell = Cell()
-    for x in range(cell_count):
+    for x in range(cell_count):# выводим пустое поле игры
             for y in range(cell_count):
                 cell.set(x,y,0)
 
@@ -175,7 +171,7 @@ def init_main_window():
     global root, canvas, scale, go_game
     root = Tk()
     root.title('Игра "Жизнь"')
-    root.minsize(field_size + 140, field_size)
+    root.minsize(field_size + 140, field_size)# ограничиваем минимальный размер главного окна
     root.maxsize(field_size + 140, field_size)
     canvas = Canvas(root, width=field_size, height=field_size)
     canvas.pack(side=LEFT)
