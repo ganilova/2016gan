@@ -23,12 +23,9 @@ def mouse_left(event):# изменение статуса ячейки по ще
     if 0<event.x < field_size and 0<event.y < field_size:# ограничиваем действие мышки полем игры
         x = event.x//cell_size
         y = event.y//cell_size
-        if map[x+1][y+1]==0:
-            cell.set(x,y,1)
-            map[x+1][y+1] = 1
-        else:
-            cell.set(x,y,0)
-            map[x+1][y+1] = 0
+        key = abs(map[x+1][y+1]-1)
+        map[x+1][y+1] = key
+        cell.set(x,y,key)
 
 def change_map():
     """
@@ -37,6 +34,11 @@ def change_map():
     выполнен переход на противоположный край
     """
     global map
+    for x in range(0,cell_count+2):
+                map[0][x]=map[cell_count][x]
+                map[cell_count+1][x]=map[1][x]
+                map[x][0]=map[x][cell_count]
+                map[x][cell_count+1]=map[x][1]
     temp = [[0] * (cell_count+2) for i in range(cell_count+2)]# Массив для хранения нового состояния
     count = 0 #число живых клеток
     for x in range(1,cell_count+1):
@@ -49,7 +51,7 @@ def change_map():
                 count_life-=map[x][y]
                 if map[x][y]==0 and count_life == 3 or map[x][y]==1 and (count_life == 3 or count_life == 2):
                     temp[x][y] = 1
-    for x in range(1,cell_count+1):# копируются крайние столбцы (строки)на противоположную сторону
+    for x in range(0,cell_count+2):# копируются крайние столбцы (строки)на противоположную сторону
             temp[0][x]=temp[cell_count][x]
             temp[cell_count+1][x]=temp[1][x]
             temp[x][0]=temp[x][cell_count]
@@ -113,7 +115,7 @@ def load_file():# Чтение игрового поля из файла в ма
                     else:
                         cell.set(x-1,y-1,0)
             f.close()
-            for x in range(1,cell_count+1):
+            for x in range(0,cell_count+2):
                 map[0][x]=map[cell_count][x]
                 map[cell_count+1][x]=map[1][x]
                 map[x][0]=map[x][cell_count]
