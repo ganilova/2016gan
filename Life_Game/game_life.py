@@ -1,3 +1,5 @@
+__author__ = "Tatyana Ganilova"
+
 from tkinter import messagebox
 from tkinter.filedialog import *
 
@@ -18,7 +20,7 @@ class Cell:
 
 def mouse_left(event):# изменение статуса ячейки по щелчку ЛКМ
     global cell
-    if 0<event.x < field_size and 0<event.y < field_size:
+    if 0<event.x < field_size and 0<event.y < field_size:# ограничиваем действие мышки полем игры
         x = event.x//cell_size
         y = event.y//cell_size
         if map[x+1][y+1]==0:
