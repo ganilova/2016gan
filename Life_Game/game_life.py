@@ -3,7 +3,6 @@ __author__ = "Tatyana Ganilova"
 from tkinter import messagebox
 from tkinter.filedialog import *
 
-sleep_time = 50   # задержка между кадрами в милисекундах
 cell_size = 20 #размер клетки по умолчанию
 field_size = 600     # ширина (высота) игрового поля
 pause = True    # истинно, если не запущена игра
@@ -69,7 +68,7 @@ def time_event():# работает постоянно,
         if change_map()==0:
             messagebox.showinfo("Сообщение",'Игра закончена')
             game()# останавливаем игру
-    canvas.after(sleep_time, time_event)
+    canvas.after(cell_size, time_event)# Задержка равна размеру ячейки
 
 def game():# процедура для кнопки СТАРТ/СТОП
     global pause
@@ -78,6 +77,13 @@ def game():# процедура для кнопки СТАРТ/СТОП
     else:
         go_game["text"]='Старт'
     pause = not pause
+
+def game_step():
+    global pause
+    pause = True
+    go_game["text"]='Старт'
+    if change_map()==0:
+            messagebox.showinfo("Сообщение",'Игра закончена')
 
 def save_file():#сохранение игрового поля в файл
     if pause:
@@ -133,7 +139,7 @@ def rules():
            '(«от одиночества» или «от перенаселённости»)\n \n '
     rule +='  Игра прекращается, если на поле не останется ни одной «живой» клетки, или если при очередном шаге ни одна из '
     rule +='клеток не меняет своего состояния (складывается стабильная конфигурация).\n \n'
-    rule +='  Игрок не принимает прямого участия в игре, а лишь расставляет на поле' \
+    rule +='  Игрок не принимает прямого участия в игре, а лишь расставляет на поле ' \
            'живые клетки левой клавишей "мышки" или загружает начальную конфигурацию из файла'
     rule +=' клеток, которые затем взаимодействуют согласно правилам уже без его участия.\n \n'
     rule +='Созданную конфигурацию первого поколения можно сохранить в файле.'
@@ -154,7 +160,7 @@ def new_field(): #Перечерчивание поля с новым разме
     init_field()
 
 def init_field(): # рассчитываем и выводим пустое поле игры
-    global cell, canvas, cell_size, cell_count, map,avatars
+    global cell, canvas, cell_size, cell_count, map,avatars, sleep_time
     cell_size = scale.get()
     cell_count = field_size // cell_size
     """map - матрица для хранения статуса ячеек (живые/неживые). Непосредственно информация
@@ -187,6 +193,10 @@ def init_main_window():
     amend_map.place(x = tab,y = 80)
     go_game = Button(root, text='Старт', width = len, font='Calibri 12', command=game)
     go_game.place(x = tab,y = 240)
+    go_step = Button(root, text='Один шаг', width = len, font='Calibri 12', command=game_step)
+    go_step.place(x = tab,y = 300)
+    help = Button(root, text='Правила', width = len, font='Calibri 12', command=rules)
+    help.place(x = tab,y = 400)
     init_field()
     init_menu()
 
