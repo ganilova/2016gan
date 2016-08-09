@@ -87,7 +87,7 @@ def game_step():
 
 def save_file():#сохранение игрового поля в файл
     if pause:
-        name_file = asksaveasfilename()+'.txt'
+        name_file = asksaveasfilename()+'.map'
         f = open(name_file,"w")
         f.write(str(cell_size)+'\n') # сохраняем размер клетки
         for x in range(1,cell_count+1):# сохраняем содержимое матрицы состояния поля
@@ -103,7 +103,7 @@ def load_file():# Чтение игрового поля из файла в ма
     global scale, map
     if pause:
         try:
-            name_file = askopenfilename(defaultextension='.txt',filetypes=[('Text files','*.txt')])
+            name_file = askopenfilename(defaultextension='.txt',filetypes=[('Text files','*.map')])
             f = open(name_file,"r")
             scale.set(int(f.readline().strip())) #считываем размер клетки
             new_field()#  рисуем поле в соответствии со считанным размером
