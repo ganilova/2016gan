@@ -102,24 +102,16 @@ def save_file():#сохранение игрового поля в файл
 def load_file():# Чтение игрового поля из файла в массив и вывод поля игры
     global scale, map
     if pause:
-        try:
-            name_file = askopenfilename(defaultextension='.txt',filetypes=[('Text files','*.map')])
-            f = open(name_file,"r")
-            scale.set(int(f.readline().strip())) #считываем размер клетки
-            new_field()#  рисуем поле в соответствии со считанным размером
-            for x in range(1,cell_count+1):# считываем информацию о распределении живых клеток в матрицу
-                for y in range(1,cell_count+1):
-                    map[x][y] = int(f.readline().strip())
-                    if map[x][y]==1:
-                        cell.set(x-1,y-1,1)# закрашиваем живые клетки
-            f.close()
-            for x in range(0,cell_count+2):
-                map[0][x]=map[cell_count][x]
-                map[cell_count+1][x]=map[1][x]
-                map[x][0]=map[x][cell_count]
-                map[x][cell_count+1]=map[x][1]
-        except IOError:
-            messagebox.showinfo("Ошибка",'Не могу открыть файл '+name_file)
+        name_file = askopenfilename(defaultextension='.txt',filetypes=[('Text files','*.map')])
+        f = open(name_file,"r")
+        scale.set(int(f.readline().strip())) #считываем размер клетки
+        new_field()#  рисуем поле в соответствии со считанным размером
+        for x in range(1,cell_count+1):# считываем информацию о распределении живых клеток в матрицу
+            for y in range(1,cell_count+1):
+                map[x][y] = int(f.readline().strip())
+                if map[x][y]==1:
+                    cell.set(x-1,y-1,1)# закрашиваем живые клетки
+        f.close()
     else:
         messagebox.showinfo("Ошибка",'Операция открытия файла недоступна во время работы!\n '
                                      'Нажмите Стоп и повторите операцию.')
