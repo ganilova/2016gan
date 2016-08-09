@@ -189,7 +189,7 @@ def init_main_window():
     scale = Scale(root, from_=5, to=50, orient=HORIZONTAL,resolution=5, length=95)
     scale.place(x = tab,y = 30)
     scale.set(cell_size)
-    amend_map = Button(root, text=' Изменить \n поле ',width = len+2, font='Calibri 10', command=new_field)
+    amend_map = Button(root, text=' Обновить \n поле ',width = len+2, font='Calibri 10', command=new_field)
     amend_map.place(x = tab,y = 80)
     go_game = Button(root, text='Старт', width = len, font='Calibri 12', command=game)
     go_game.place(x = tab,y = 240)
